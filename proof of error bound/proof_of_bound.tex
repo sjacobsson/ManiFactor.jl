@@ -1,0 +1,164 @@
+\documentclass[english, a4paper, 12pt]{article}
+\input{preamble.tex}
+\usepackage[]{mathrsfs} % For \mathscr
+\usepackage{textcomp} % Mainly for using interrobang
+
+\title{Proof of error bound on manifold given error bound on the tangent space}
+\author{}
+\date{\today}
+
+
+\begin{document}
+
+\maketitle
+
+
+\begin{theorem}[Toponogov]\label{thm:toponogov}
+	Let $M$ be a complete Riemannian manifold with sectional curvature $K \geq H$.
+	Let $\gamma_1$ and $\gamma_2$ be geodesics on $M$ such that $\gamma_1(0) = \gamma_2(0)$.
+	If $H > 0$, assume $\abs{\gamma_1}$, $\abs{\gamma_2} \leq \frac{\pi}{\sqrt{H}}$.
+	Let $\lambda_1$ and $\lambda_2$ be geodesics on a model manifold $N$ of constant curvature $H$ such that
+	\begin{align}
+		\lambda_1(0) ={}& \lambda_2(0),\\
+		\abs{\lambda_1} ={}& \abs{\gamma_1},\\
+		\abs{\lambda_2} ={}& \abs{\gamma_2},\\
+		\angle(\lambda_1, \lambda_2) ={}& \angle(\gamma_1, \gamma_2).
+	\end{align}
+	Then
+	\begin{align}
+		d_{M}(\gamma_1(x), \gamma_2(y)) \leq d_{N}(\lambda_1(x), \lambda_2(y))
+	\end{align}
+	for all $x$, $y \in [0, 1]$.
+\end{theorem}
+
+\begin{lemma}[Spherical and hyperbolic law of cosines]\label{lemma:law_of_cosines}
+	Let $N$ be a manifold of constant curvature $H$.
+	Let $T$ be a geodesic triangle on $N$ with side lengths $A$, $B$, $C$ and angles $a$, $b$, $c$.
+	Then
+	\begin{align}
+		\cos{C \sqrt{H}} ={}& \cos{A \sqrt{H}} \cos{B \sqrt{H}} + \sin{A \sqrt{H}} \sin{B \sqrt{H}} \cos{c}
+	\end{align}
+	if $H > 0$, and
+	\begin{align}
+		\cosh{C \sqrt{\abs{H}}} ={}& \cosh{A \sqrt{\abs{H}}} \cosh{B \sqrt{\abs{H}}} - \sinh{A \sqrt{\abs{H}}} \sinh{B \sqrt{\abs{H}}} \cos{c}
+	\end{align}
+	if $H < 0$.
+\end{lemma}
+
+
+\begin{lemma}
+	\todo[inline]{TODO: inequalities for cosine.}
+\end{lemma}
+
+\begin{theorem}
+	Let $M$ be a Riemannian manifold with sectional curvature bounded from below by $H$ and let $f \from R \to M$ where $R$ is a subset of $\reals^n$ such that its image fits in a single normal coordinate chart of $M$.
+	Let $p \in M$ and define $g = \operatorname{log}_p \circ f \from R \to \reals^n$.
+	Let $\mathhat{g}$ be an approximation of $g$ and define $\mathhat{f} = \operatorname{exp}_p \circ \mathhat{g}$.
+	If $\mathhat{g}$ satisfies $\abs{g(x) - \mathhat{g}(x)} \leq G$ for some sufficiently small $G$, then
+	\begin{align}
+		\abs{f(x) - \mathhat{f}(x)} \leq G
+	\end{align}
+	if $H < 0$, and
+	\begin{align}
+		\abs{f(x) - \mathhat{f}(x)} \leq \frac{2 G}{\sqrt{H}} \sqrt{b(G) + \frac{\sinh^2{(\sqrt{H} \abs{g})}}{2 \cdot \abs{g}^2}}
+	\end{align}
+	if $H > 0$, where $b$ is a locally bounded function that approches $\frac{1}{2}$ as $G \to 0$.
+\end{theorem}
+
+\begin{proof}
+	Let $N$ be the manifold of constant curvature $H$ and let $q \in N$.
+	Define $h = \operatorname{exp}_{N, q} \circ g$ and $\mathhat{h} = \operatorname{exp}_{N, q} \circ \mathhat{g}$.
+	By \cref{thm:toponogov}, we have that
+	\begin{align}
+		d_M(f(x), \mathhat{f}(y)) \leq d_N(h(x), \mathhat{h}(y)).
+	\end{align}
+
+	\paragraph{Case 1: $H > 0$.}
+	Let $\cos'{t} = \cos{t \sqrt{H}}$ and $\sin'{t} = \sin{t \sqrt{H}}$ be reparametrized trigonometric functions and consider the geodesic triangle $(h(x), \mathhat{h}(x), q)$ on $N$.
+	By \cref{lemma:law_of_cosines},
+	\begin{align}
+		\cos'{d(h, \mathhat{h})} ={}&
+			\cos'{d(h, q)} \cos'{d(\mathhat{h}, q)}
+			+ \sin'{d(h, q)} \sin'{d(\mathhat{h}, q)} \cos{\left\{ \angle(h, \mathhat{h}) \right\}}\\
+		%
+		={}&
+			\cos'{\abs{g}} \cos'{\abs{\mathhat{g}}}
+			+ \sin'{\abs{g}} \sin'{\abs{\mathhat{g}}} \cos{\left\{ \angle(g, \mathhat{g}) \right\}}\\
+		%
+		={}& \frac{1}{2} \big[
+			\cos'{(\abs{g} - \abs{\mathhat{g}})}
+			+ \cos'{(\abs{g} + \abs{\mathhat{g}})}
+		\big]\\
+		&+ \frac{1}{2} \big[
+			\cos'{(\abs{g} - \abs{\mathhat{g}})}
+			- \cos'{(\abs{g} + \abs{\mathhat{g}})}
+		\big] \cos{\left\{ \angle(g, \mathhat{g}) \right\}}.%
+		\label{eq:exact_expression_for_cos_of_rhs}
+	\end{align}
+	Since $\cos'{}$ is decreasing on $[0, \frac{\pi}{\sqrt{H}}]$, and since $\abs{g}$, $\abs{\mathhat{g}} < \frac{\pi}{2 \sqrt{H}}$ \todo[inline]{(write down this condition in the thm)},
+	\begin{align}
+		\cos'{(\abs{g} - \abs{\mathhat{g}})}
+		- \cos'{(\abs{g} + \abs{\mathhat{g}})} \geq 0,
+	\end{align}
+	so using $\cos{\left\{ \angle(g, \mathhat{g}) \right\}} \leq 1$ in \cref{eq:exact_expression_for_cos_of_rhs} gives us
+	\begin{align}
+		\cos'{d(h, \mathhat{h})} \geq{}& \cos{(\abs{g} - \abs{\mathhat{g}})}.
+	\end{align}
+	And so
+	\begin{align}
+		d(h, \mathhat{h}) \leq{}& \abs{\abs{g} - \abs{\mathhat{g}}}\\
+		\leq{}& \abs{g - \mathhat{g}}
+	\end{align}
+	
+	\paragraph{Case 2: $H < 0$.}
+	Let $\cosh'{t} = \cosh{t \sqrt{\abs{H}}}$ and $\sinh'{t} = \sinh{t \sqrt{\abs{H}}}$ be reparametrized hyperbolic trigonometric functions and consider again the geodesic triangle $(h(x), \mathhat{h}(x), q)$.
+	Similarly to case 1,
+	\begin{align}
+		\cosh'{d(h, \mathhat{h})} ={}& \frac{1}{2} \big[
+			\cosh'{(\abs{g} - \abs{\mathhat{g}})}
+			+ \cosh'{(\abs{g} + \abs{\mathhat{g}})}
+		\big]\\
+		&- \frac{1}{2} \big[
+			-\cosh'{(\abs{g} - \abs{\mathhat{g}})}
+			+ \cosh'{(\abs{g} + \abs{\mathhat{g}})}
+		\big] \cos{\left\{ \angle(g, \mathhat{g}) \right\}}.%
+		\label{eq:exact_expression_for_cosh_of_rhs}
+	\end{align}
+	Since $\cosh'{}$ is increasing,
+	\begin{align}
+		-\cosh'{(\abs{g} - \abs{\mathhat{g}})} + \cosh'{(\abs{g} + \abs{\mathhat{g}})} \geq 0,
+	\end{align}
+	so $\cos{\left\{ \angle(g, \mathhat{g}) \right\}} \geq 1 - \frac{1}{2} \angle(g, \mathhat{g})^2 \geq 1 - \frac{\abs{g - \mathhat{g}}^2}{\abs{g}^2}$ \todo[inline]{(motivate these?)} gives us
+	\begin{align}
+		\cosh'{d(h, \mathhat{h})} \leq{}& \cosh'{(\abs{g} - \abs{\mathhat{g}})} + \sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}} \frac{\abs{g - \mathhat{g}}^2}{\abs{g}^2}.
+	\end{align}
+	The taylor series of $\cosh'{}$ contains only positive terms, so the LHS can be lower bounded by truncating its series.
+	Since $\cosh'{}$ is increasing, the RHS can be upper bounded by the inverse triangle inequality.
+	We have
+	\begin{align}
+	1 + \frac{1}{2} d(h, \mathhat{h})^2 \abs{H} \leq{}&
+		\cosh'{\abs{g - \mathhat{g}}}
+		+ \sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}} \frac{\abs{g - \mathhat{g}}^2}{\abs{g}^2}\\
+	%
+	={}& 1 + 2 \sinh'^2{\frac{\abs{g - \mathhat{g}}}{2}} + \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{\abs{g}^2} \abs{g - \mathhat{g}}^2,\\
+	%
+	d(h, \mathhat{h})
+	\leq{}& \frac{2}{\sqrt{H}} \sqrt{
+		\frac{\sinh'^2{\frac{\abs{g - \mathhat{g}}}{2}}}{\abs{g - \mathhat{g}}^2}
+		+ \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{2 \abs{g}^2}
+		} \abs{g - \mathhat{g}}\\
+	%
+	\leq{}& \frac{2}{\sqrt{H}} \sqrt{
+		\frac{\sinh'^2{\frac{G}{2}}}{G^2}
+		+ \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{2 \abs{g}^2}
+		} \abs{g - \mathhat{g}}.
+	\end{align}
+	\todo[inline]{Motivate why we can assume $\abs{g}$ is the largest.}
+\end{proof}
+
+
+
+
+
+
+\end{document}

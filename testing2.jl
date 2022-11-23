@@ -30,8 +30,8 @@ end#=}}}=#
 M = Sphere(2)
 
 # f : R^2 -> M is the function we wish to approximate
-f(v) = nproj((v[1]^2 - v[2]^2) / 4, v[1] * v[2] / 2) # Stereographic projection of 1/4 z^2
-# f(v) = nproj((v[1]^3 - v[2]^4) / 4, v[1] * v[2] / 2)
+# f(v) = nproj((v[1]^2 - v[2]^2) / 4, v[1] * v[2] / 2) # Stereographic projection of 1/4 z^2 
+f(v) = nproj((v[1]^3 - v[2]^4) / 4, v[1] * v[2] / 2)
 # f(v) = normalize([0.9580 0.2439; 0.3942 0.8628; 0.3899 0.0580] * v + [0.2725, 0.7744, 0.8169]) # Projection onto S^2 of some random affine map : R^2 -> R^3
 
 
@@ -39,7 +39,7 @@ f(v) = nproj((v[1]^2 - v[2]^2) / 4, v[1] * v[2] / 2) # Stereographic projection 
 
 
 # Evaluate f on a point cloud in R^2
-grid_length = 4
+grid_length = 7
 domain = TensorSpace(Chebyshev(), Chebyshev())
 grid = points(domain, grid_length^2)
 fs = f.(grid)
