@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1669289270 "proof_of_bound.tex" "proof_of_bound.pdf" "proof_of_bound" 1669289271
+["pdflatex"] 1669328049 "proof_of_bound.tex" "proof_of_bound.pdf" "proof_of_bound" 1669328050
   "/etc/texmf/web2c/texmf.cnf" 1634120337 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm" 1136768653 1408 5937f58aa508ea2cea4901c07d10f5fe ""
@@ -38,7 +38,6 @@
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb" 1248133631 36741 fa121aac0049305630cf160b86157ee4 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb" 1248133631 35469 70d41d2b9ea31d5d813066df7c99281c ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb" 1248133631 32722 d7379af29a190c3f453aba36302ff5a9 ""
-  "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb" 1248133631 32734 69e00a6b65cedb993666e42eedb3d48f ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb" 1248133631 32726 0a1aea6fcd6468ee2cf64d891f5c43c8 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb" 1248133631 32569 5e5ddc8df908dea60932f3c484a54c0d ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb" 1248133631 32626 4f5c1b83753b1dd3a97d1b399a005b4b ""
@@ -279,9 +278,9 @@
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1634121331 8256861 4a5774b0d11014c56390af526479a900 ""
   "my_commands.tex" 1668156313 2208 c3670531d3b75e6d679b2f0b477a9e09 ""
   "preamble.tex" 1669197637 6740 36ea04d840a9a00cef2de418bada359d ""
-  "proof_of_bound.aux" 1669289271 1634 a674de57c2791e4e2d2fbb414a373133 "pdflatex"
-  "proof_of_bound.out" 1669289271 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "proof_of_bound.tex" 1669289269 7153 06d737551ce447477eb4dcc5055961bc ""
+  "proof_of_bound.aux" 1669328050 1769 b8093f53884743ee81cf93e2e95ed5dd "pdflatex"
+  "proof_of_bound.out" 1669328050 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "proof_of_bound.tex" 1669328048 7948 11f631a8f61a2a46580a3565b5f459ed ""
   (generated)
   "proof_of_bound.out"
   "proof_of_bound.aux"

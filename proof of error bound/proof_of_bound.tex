@@ -7,6 +7,7 @@
 \author{}
 \date{\today}
 
+\newcommand\bodgeip[2]{\langle #1, #2 \rangle} % BODGE
 
 \begin{document}
 
@@ -46,38 +47,40 @@
 \end{lemma}
 
 \begin{theorem}
-	Let $M^n$ be a Riemannian manifold with sectional curvature bounded from below by $H$ and let $f \from R \to M$ where $R$ is a subset of $\reals^n$ such that its image fits in a single normal coordinate chart $S$ of $M$.
+	Let $M$ be a Riemannian manifold with sectional curvature bounded from below by $H$ and let $f \from R \to M$ where $R$ is a subset of $\reals^n$ such that its image fits in a single normal coordinate chart $S$ of $M$.
 	Let $p \in M$ and define $g = \operatorname{log}_p \circ f \from R \to S$.
-	Let $\mathhat{g} \from R \to S$ be an approximation of $g$ and define $\mathhat{f} = \operatorname{exp}_p \circ \mathhat{g}$.
-	If $\mathhat{g}$ satisfies $\abs{g(x) - \mathhat{g}(x)} \leq G$ for some sufficiently small $G$, then
+	Let $\mathhat{g} \from R \to S$ be an approximation of $g$ such that
 	\begin{align}
-		\abs{f(x) - \mathhat{f}(x)} \leq G
+		\abs{g(x) - \mathhat{g}(x)} \leq \epsilon
 	\end{align}
-	if $H < 0$ and $\Sigma < \frac{\pi}{2 \sqrt{H}}$, and
+	and define $\mathhat{f} = \operatorname{exp}_p \circ \mathhat{g}$.
+	If $H > 0$ and $\abs{g}$, $\abs{\mathhat{g}} < \frac{\pi}{\sqrt{H}}$, then
 	\begin{align}
-		\abs{f(x) - \mathhat{f}(x)} \leq 2 G \sqrt{
-			\frac{\sinh^2{\frac{\sqrt{\abs{H}} G}{2}}}{\abs{H} G^2}
-			+ \frac{\sinh{(\sqrt{\abs{H}} \abs{g})} \sinh{(\sqrt{\abs{H}} \abs{\mathhat{g}})}}{2 \abs{H} \cdot \abs{g}^2}
-			}
+		\abs{f(x) - \mathhat{f}(x)} \leq \epsilon.
 	\end{align}
-	if $H > 0$.
-
-	Furthermore, if the norms of vectors in $S$ are bounded by $\Sigma$, then
+	If $H < 0$, then
 	\begin{align}
-		\abs{f(x) - \mathhat{f}(x)} \leq 2 G \sqrt{
-			\frac{\sinh^2{\frac{\sqrt{\abs{H}} G}{2}}}{\abs{H} G^2}
-			+ \frac{\sinh^2{(\sqrt{\abs{H}} \Sigma)}}{2 \abs{H} \Sigma^2}
+		\abs{f(x) - \mathhat{f}(x)} \leq \epsilon \sqrt{
+			\frac{\sinh^2{(\sqrt{\abs{H}} \epsilon / 2)}}{(\sqrt{\abs{H}} \epsilon / 2)^2}
+			+ 2 \frac{\sinh{(\sqrt{\abs{H}} \abs{g})} \sinh{(\sqrt{\abs{H}} \abs{\mathhat{g}})}}{\abs{H}  \abs{g} \abs{\mathhat{g}}}
+			}.
+	\end{align}
+	Furthermore, if the norms of vectors in $S$ are bounded by $\sigma$, then
+	\begin{align}
+		\abs{f(x) - \mathhat{f}(x)} \leq \epsilon \sqrt{
+			\frac{\sinh^2{(\sqrt{\abs{H}} \epsilon / 2)}}{(\sqrt{\abs{H}} \epsilon / 2)^2}
+			+ 2 \frac{\sinh^2{(\sqrt{\abs{H}} \sigma)}}{\abs{H} \sigma^2}
 			}
 	\end{align}
 \end{theorem}
 
 \paragraph{Remark} 
-$\frac{\sinh^2{x}}{x^2}$ is a locally bounded function that is increasing on $\reals^+$ and that approches $\frac{1}{2}$ as $x \to 0$.
+$\frac{\sinh{x}}{x}$ is a locally bounded increasing (on $\reals^+$) function that approches $1$ as $x \to 0$.
 
 \begin{proof}
 	Let $N$ be the manifold of constant curvature $H$ and let $q \in N$.
 	Define $h = \operatorname{exp}_{N, q} \circ g$ and $\mathhat{h} = \operatorname{exp}_{N, q} \circ \mathhat{g}$.
-	This is well-defined in the positive curvature case by requiring $\Sigma < \frac{\pi}{2 \sqrt{H}}$.
+	This is well-defined by requiring that $\abs{g}$, $\abs{\mathhat{g}} < \frac{\pi}{\sqrt{H}}$ when $H > 0$.
 	By \cref{thm:toponogov}, we have that
 	\begin{align}
 		d_M(f(x), \mathhat{f}(y)) \leq d_N(h(x), \mathhat{h}(y)).
@@ -94,26 +97,24 @@ $\frac{\sinh^2{x}}{x^2}$ is a locally bounded function that is increasing on $\r
 		%
 		={}&
 			\cos'{\abs{g}} \cos'{\abs{\mathhat{g}}}
-			+ \sin'{\abs{g}} \sin'{\abs{\mathhat{g}}} \cos{\left\{ \angle(g, \mathhat{g}) \right\}}\\
-		%
-		={}& \frac{1}{2} \big[
-			\cos'{(\abs{g} - \abs{\mathhat{g}})}
-			+ \cos'{(\abs{g} + \abs{\mathhat{g}})}
-		\big]\nonumber\\
-		&+ \frac{1}{2} \big[
-			\cos'{(\abs{g} - \abs{\mathhat{g}})}
-			- \cos'{(\abs{g} + \abs{\mathhat{g}})}
-		\big] \cos{\left\{ \angle(g, \mathhat{g}) \right\}}.%
+			+ \sin'{\abs{g}} \sin'{\abs{\mathhat{g}}} \cos{\left\{ \angle(g, \mathhat{g}) \right\}}.%
 		\label{eq:exact_expression_for_cos_of_rhs}
 	\end{align}
-	Since $\cos'{}$ is decreasing on $[0, \frac{\pi}{\sqrt{H}}]$, and since $\abs{g}$, $\abs{\mathhat{g}} < \frac{\pi}{2 \sqrt{H}}$,
+	Since $\abs{g}$, $\abs{\mathhat{g}} < \frac{\pi}{\sqrt{H}}$,
 	\begin{align}
-		\cos'{(\abs{g} - \abs{\mathhat{g}})}
-		- \cos'{(\abs{g} + \abs{\mathhat{g}})} \geq 0,
+		\sin'{\abs{g}} \sin'{\abs{\mathhat{g}}} \geq 0.
 	\end{align}
-	so using $\cos{\left\{ \angle(g, \mathhat{g}) \right\}} \leq 1$ in \cref{eq:exact_expression_for_cos_of_rhs} gives us
+	Hence using
 	\begin{align}
-		\cos'{d(h, \mathhat{h})} \geq{}& \cos{(\abs{g} - \abs{\mathhat{g}})}.
+		\cos{\left\{ \angle(g, \mathhat{g}) \right\}} \leq 1
+	\end{align}
+	in \cref{eq:exact_expression_for_cos_of_rhs} gives us
+	\begin{align}
+		\cos'{d(h, \mathhat{h})} \geq{}&
+			\cos'{\abs{g}} \cos'{\abs{\mathhat{g}}}
+			+ \sin'{\abs{g}} \sin'{\abs{\mathhat{g}}}\\
+		%
+		={}& \cos{(\abs{g} - \abs{\mathhat{g}})}.
 	\end{align}
 	And so
 	\begin{align}
@@ -123,45 +124,62 @@ $\frac{\sinh^2{x}}{x^2}$ is a locally bounded function that is increasing on $\r
 	
 	\paragraph{Case 2: $H < 0$.}
 	Let $\cosh'{t} = \cosh{t \sqrt{\abs{H}}}$ and $\sinh'{t} = \sinh{t \sqrt{\abs{H}}}$ and consider again the geodesic triangle $(h(x), \mathhat{h}(x), q)$.
-	Similarly to case 1,
+	Again, by \cref{lemma:law_of_cosines},
 	\begin{align}
-		\cosh'{d(h, \mathhat{h})} ={}& \frac{1}{2} \big[
-			\cosh'{(\abs{g} - \abs{\mathhat{g}})}
-			+ \cosh'{(\abs{g} + \abs{\mathhat{g}})}
-		\big]\\
-		&- \frac{1}{2} \big[
-			-\cosh'{(\abs{g} - \abs{\mathhat{g}})}
-			+ \cosh'{(\abs{g} + \abs{\mathhat{g}})}
-		\big] \cos{\left\{ \angle(g, \mathhat{g}) \right\}}.%
+		\cosh'{d(h, \mathhat{h})} ={}&
+		\cosh'{\abs{g}} \cosh'{\abs{\mathhat{g}}} - \sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}} \cos{\left\{ \angle(g, \mathhat{g}) \right\}}.%
 		\label{eq:exact_expression_for_cosh_of_rhs}
+		%
+		% ={}& \frac{1}{2} \big[
+		% 	\cosh'{(\abs{g} - \abs{\mathhat{g}})}
+		% 	+ \cosh'{(\abs{g} + \abs{\mathhat{g}})}
+		% \big]\\
+		% &- \frac{1}{2} \big[
+		% 	-\cosh'{(\abs{g} - \abs{\mathhat{g}})}
+		% 	+ \cosh'{(\abs{g} + \abs{\mathhat{g}})}
+		% \big] \cos{\left\{ \angle(g, \mathhat{g}) \right\}}.%
+		% \label{eq:exact_expression_for_cosh_of_rhs}
 	\end{align}
-	Since $\cosh'{}$ is increasing,
+	Since $\sinh'{}$ is positive for positive arguments,
 	\begin{align}
-		-\cosh'{(\abs{g} - \abs{\mathhat{g}})} + \cosh'{(\abs{g} + \abs{\mathhat{g}})} \geq 0,
+		\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}} \geq 0.
 	\end{align}
-	so $\cos{\left\{ \angle(g, \mathhat{g}) \right\}} \geq 1 - \frac{1}{2} \angle(g, \mathhat{g})^2 \geq 1 - \frac{\abs{g - \mathhat{g}}^2}{\abs{g}^2}$ gives us
+	% \begin{align}
+	% 	-\cosh'{(\abs{g} - \abs{\mathhat{g}})} + \cosh'{(\abs{g} + \abs{\mathhat{g}})} \geq 0,
+	% \end{align}
+	Hence using
 	\begin{align}
-		\cosh'{d(h, \mathhat{h})} \leq{}& \cosh'{(\abs{g} - \abs{\mathhat{g}})} + \sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}} \frac{\abs{g - \mathhat{g}}^2}{\abs{g}^2}.
+		% \cos{\left\{ \angle(g, \mathhat{g}) \right\}} \geq 1 - \frac{1}{2} \angle(g, \mathhat{g})^2 \geq 1 - \frac{\abs{g - \mathhat{g}}^2}{2 \abs{g}^2}.
+		\cos{\left\{ \angle(g, \mathhat{g}) \right\}} ={}& \frac{\bodgeip{g}{\mathhat{g}}}{\abs{g} \abs{\mathhat{g}}}\\
+		%
+		={}& \frac{\abs{g}^2 + \abs{\mathhat{g}}^2}{2 \abs{g} \abs{\mathhat{g}}} - \frac{\abs{g - \mathhat{g}}^2}{2 \abs{g} \abs{\mathhat{g}}}\\
+		%
+		\geq{}& 1 - \frac{\abs{g - \mathhat{g}}^2}{2 \abs{g} \abs{\mathhat{g}}}
 	\end{align}
-	The taylor expansion of $\cosh'{}$ contains only positive terms, so the LHS can be lower bounded by truncating its series.
-	Since $\cosh'{}$ is increasing, the RHS can be upper bounded by the inverse triangle inequality.
+	in \cref{eq:exact_expression_for_cosh_of_rhs} gives us
+	\begin{align}
+		\cosh'{d(h, \mathhat{h})} \leq{}& \cosh'{(\abs{g} - \abs{\mathhat{g}})} + \sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}} \frac{\abs{g - \mathhat{g}}^2}{2 \abs{g} \abs{\mathhat{g}}}.%
+		\label{eq:almost_there}
+	\end{align}
+	The taylor expansion of $\cosh'{}$ contains only positive terms, so the LHS of \cref{eq:almost_there} can be lower bounded by truncating its series.
+	Since $\cosh'{}$ is increasing on $\reals^+$ and symmetric, the RHS of \cref{eq:almost_there} can be upper bounded using the inverse triangle inequality.
 	We have
 	\begin{align}
 	1 + \frac{1}{2} d(h, \mathhat{h})^2 \abs{H} \leq{}&
 		\cosh'{\abs{g - \mathhat{g}}}
-		+ \sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}} \frac{\abs{g - \mathhat{g}}^2}{\abs{g}^2}\\
+		+ \sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}} \frac{\abs{g - \mathhat{g}}^2}{2 \abs{g} \abs{\mathhat{g}}}\\
 	%
-	={}& 1 + 2 \sinh'^2{\frac{\abs{g - \mathhat{g}}}{2}} + \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{\abs{g}^2} \abs{g - \mathhat{g}}^2,\\
+	={}& 1 + 2 \sinh'^2{\frac{\abs{g - \mathhat{g}}}{2}} + \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{2 \abs{g} \abs{\mathhat{g}}} \abs{g - \mathhat{g}}^2,\\
 	%
 	d(h, \mathhat{h})
-	\leq{}& \frac{2 \abs{g - \mathhat{g}}}{\sqrt{\abs{H}}} \sqrt{
-		\frac{\sinh'^2{\frac{\abs{g - \mathhat{g}}}{2}}}{\abs{g - \mathhat{g}}^2}
-		+ \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{2 \abs{g}^2}
+	\leq{}& \abs{g - \mathhat{g}} \sqrt{
+		4 \frac{\sinh'^2{\frac{\abs{g - \mathhat{g}}}{2}}}{\abs{H} \abs{g - \mathhat{g}}^2}
+		+ 2 \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{\abs{H} \abs{g} \abs{\mathhat{g}}}
 		}\\
 	%
-	\leq{}& \frac{2 \abs{g - \mathhat{g}}}{\sqrt{\abs{H}}} \sqrt{
-		\frac{\sinh'^2{\frac{G}{2}}}{G^2}
-		+ \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{2 \abs{g}^2}
+	\leq{}& \epsilon \sqrt{
+		4 \frac{\sinh'^2{\frac{\epsilon}{2}}}{\abs{H}\epsilon^2}
+		+ 2 \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{\abs{H} \abs{g} \abs{\mathhat{g}}}
 		}.
 	\end{align}
 \end{proof}
