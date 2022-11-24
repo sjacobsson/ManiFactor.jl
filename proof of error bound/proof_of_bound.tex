@@ -45,33 +45,44 @@
 	if $H < 0$.
 \end{lemma}
 
-
-\begin{lemma}
-	\todo[inline]{TODO: inequalities for cosine.}
-\end{lemma}
-
 \begin{theorem}
-	Let $M$ be a Riemannian manifold with sectional curvature bounded from below by $H$ and let $f \from R \to M$ where $R$ is a subset of $\reals^n$ such that its image fits in a single normal coordinate chart of $M$.
-	Let $p \in M$ and define $g = \operatorname{log}_p \circ f \from R \to \reals^n$.
-	Let $\mathhat{g}$ be an approximation of $g$ and define $\mathhat{f} = \operatorname{exp}_p \circ \mathhat{g}$.
+	Let $M^n$ be a Riemannian manifold with sectional curvature bounded from below by $H$ and let $f \from R \to M$ where $R$ is a subset of $\reals^n$ such that its image fits in a single normal coordinate chart $S$ of $M$.
+	Let $p \in M$ and define $g = \operatorname{log}_p \circ f \from R \to S$.
+	Let $\mathhat{g} \from R \to S$ be an approximation of $g$ and define $\mathhat{f} = \operatorname{exp}_p \circ \mathhat{g}$.
 	If $\mathhat{g}$ satisfies $\abs{g(x) - \mathhat{g}(x)} \leq G$ for some sufficiently small $G$, then
 	\begin{align}
 		\abs{f(x) - \mathhat{f}(x)} \leq G
 	\end{align}
-	if $H < 0$, and
+	if $H < 0$ and $\Sigma < \frac{\pi}{2 \sqrt{H}}$, and
 	\begin{align}
-		\abs{f(x) - \mathhat{f}(x)} \leq \frac{2 G}{\sqrt{H}} \sqrt{b(G) + \frac{\sinh^2{(\sqrt{H} \abs{g})}}{2 \cdot \abs{g}^2}}
+		\abs{f(x) - \mathhat{f}(x)} \leq 2 G \sqrt{
+			\frac{\sinh^2{\frac{\sqrt{\abs{H}} G}{2}}}{\abs{H} G^2}
+			+ \frac{\sinh{(\sqrt{\abs{H}} \abs{g})} \sinh{(\sqrt{\abs{H}} \abs{\mathhat{g}})}}{2 \abs{H} \cdot \abs{g}^2}
+			}
 	\end{align}
-	if $H > 0$, where $b$ is a locally bounded function that approches $\frac{1}{2}$ as $G \to 0$.
+	if $H > 0$.
+
+	Furthermore, if the norms of vectors in $S$ are bounded by $\Sigma$, then
+	\begin{align}
+		\abs{f(x) - \mathhat{f}(x)} \leq 2 G \sqrt{
+			\frac{\sinh^2{\frac{\sqrt{\abs{H}} G}{2}}}{\abs{H} G^2}
+			+ \frac{\sinh^2{(\sqrt{\abs{H}} \Sigma)}}{2 \abs{H} \Sigma^2}
+			}
+	\end{align}
 \end{theorem}
+
+\paragraph{Remark} 
+$\frac{\sinh^2{x}}{x^2}$ is a locally bounded function that is increasing on $\reals^+$ and that approches $\frac{1}{2}$ as $x \to 0$.
 
 \begin{proof}
 	Let $N$ be the manifold of constant curvature $H$ and let $q \in N$.
 	Define $h = \operatorname{exp}_{N, q} \circ g$ and $\mathhat{h} = \operatorname{exp}_{N, q} \circ \mathhat{g}$.
+	This is well-defined in the positive curvature case by requiring $\Sigma < \frac{\pi}{2 \sqrt{H}}$.
 	By \cref{thm:toponogov}, we have that
 	\begin{align}
 		d_M(f(x), \mathhat{f}(y)) \leq d_N(h(x), \mathhat{h}(y)).
 	\end{align}
+	Now our task is to bound the right-hand side of this inequality when $x = y$.
 
 	\paragraph{Case 1: $H > 0$.}
 	Let $\cos'{t} = \cos{t \sqrt{H}}$ and $\sin'{t} = \sin{t \sqrt{H}}$ be reparametrized trigonometric functions and consider the geodesic triangle $(h(x), \mathhat{h}(x), q)$ on $N$.
@@ -88,14 +99,14 @@
 		={}& \frac{1}{2} \big[
 			\cos'{(\abs{g} - \abs{\mathhat{g}})}
 			+ \cos'{(\abs{g} + \abs{\mathhat{g}})}
-		\big]\\
+		\big]\nonumber\\
 		&+ \frac{1}{2} \big[
 			\cos'{(\abs{g} - \abs{\mathhat{g}})}
 			- \cos'{(\abs{g} + \abs{\mathhat{g}})}
 		\big] \cos{\left\{ \angle(g, \mathhat{g}) \right\}}.%
 		\label{eq:exact_expression_for_cos_of_rhs}
 	\end{align}
-	Since $\cos'{}$ is decreasing on $[0, \frac{\pi}{\sqrt{H}}]$, and since $\abs{g}$, $\abs{\mathhat{g}} < \frac{\pi}{2 \sqrt{H}}$ \todo[inline]{(write down this condition in the thm)},
+	Since $\cos'{}$ is decreasing on $[0, \frac{\pi}{\sqrt{H}}]$, and since $\abs{g}$, $\abs{\mathhat{g}} < \frac{\pi}{2 \sqrt{H}}$,
 	\begin{align}
 		\cos'{(\abs{g} - \abs{\mathhat{g}})}
 		- \cos'{(\abs{g} + \abs{\mathhat{g}})} \geq 0,
@@ -111,7 +122,7 @@
 	\end{align}
 	
 	\paragraph{Case 2: $H < 0$.}
-	Let $\cosh'{t} = \cosh{t \sqrt{\abs{H}}}$ and $\sinh'{t} = \sinh{t \sqrt{\abs{H}}}$ be reparametrized hyperbolic trigonometric functions and consider again the geodesic triangle $(h(x), \mathhat{h}(x), q)$.
+	Let $\cosh'{t} = \cosh{t \sqrt{\abs{H}}}$ and $\sinh'{t} = \sinh{t \sqrt{\abs{H}}}$ and consider again the geodesic triangle $(h(x), \mathhat{h}(x), q)$.
 	Similarly to case 1,
 	\begin{align}
 		\cosh'{d(h, \mathhat{h})} ={}& \frac{1}{2} \big[
@@ -128,11 +139,11 @@
 	\begin{align}
 		-\cosh'{(\abs{g} - \abs{\mathhat{g}})} + \cosh'{(\abs{g} + \abs{\mathhat{g}})} \geq 0,
 	\end{align}
-	so $\cos{\left\{ \angle(g, \mathhat{g}) \right\}} \geq 1 - \frac{1}{2} \angle(g, \mathhat{g})^2 \geq 1 - \frac{\abs{g - \mathhat{g}}^2}{\abs{g}^2}$ \todo[inline]{(motivate these?)} gives us
+	so $\cos{\left\{ \angle(g, \mathhat{g}) \right\}} \geq 1 - \frac{1}{2} \angle(g, \mathhat{g})^2 \geq 1 - \frac{\abs{g - \mathhat{g}}^2}{\abs{g}^2}$ gives us
 	\begin{align}
 		\cosh'{d(h, \mathhat{h})} \leq{}& \cosh'{(\abs{g} - \abs{\mathhat{g}})} + \sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}} \frac{\abs{g - \mathhat{g}}^2}{\abs{g}^2}.
 	\end{align}
-	The taylor series of $\cosh'{}$ contains only positive terms, so the LHS can be lower bounded by truncating its series.
+	The taylor expansion of $\cosh'{}$ contains only positive terms, so the LHS can be lower bounded by truncating its series.
 	Since $\cosh'{}$ is increasing, the RHS can be upper bounded by the inverse triangle inequality.
 	We have
 	\begin{align}
@@ -143,17 +154,16 @@
 	={}& 1 + 2 \sinh'^2{\frac{\abs{g - \mathhat{g}}}{2}} + \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{\abs{g}^2} \abs{g - \mathhat{g}}^2,\\
 	%
 	d(h, \mathhat{h})
-	\leq{}& \frac{2}{\sqrt{H}} \sqrt{
+	\leq{}& \frac{2 \abs{g - \mathhat{g}}}{\sqrt{\abs{H}}} \sqrt{
 		\frac{\sinh'^2{\frac{\abs{g - \mathhat{g}}}{2}}}{\abs{g - \mathhat{g}}^2}
 		+ \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{2 \abs{g}^2}
-		} \abs{g - \mathhat{g}}\\
+		}\\
 	%
-	\leq{}& \frac{2}{\sqrt{H}} \sqrt{
+	\leq{}& \frac{2 \abs{g - \mathhat{g}}}{\sqrt{\abs{H}}} \sqrt{
 		\frac{\sinh'^2{\frac{G}{2}}}{G^2}
 		+ \frac{\sinh'{\abs{g}} \sinh'{\abs{\mathhat{g}}}}{2 \abs{g}^2}
-		} \abs{g - \mathhat{g}}.
+		}.
 	\end{align}
-	\todo[inline]{Motivate why we can assume $\abs{g}$ is the largest.}
 \end{proof}
 
 

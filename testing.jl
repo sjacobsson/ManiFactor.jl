@@ -2,6 +2,8 @@ ENV["MPLBACKEND"] = "TkAgg" ;# Solves "Warning: No working GUI backend found for
 using
     ManifoldsBase,
 	Manifolds,
+    Polynomials,
+    Cubature,
     Optim,
     Plots
 pyplot()
@@ -98,32 +100,148 @@ function distance( # Integrates the d(f1(x), f2(x)) on the unit square{{{
     f1::Function,
     f2::Function
     )
+    # TODO: adjust reltol dynamically
+    
+    (I, ~) = hcubature(
+        x -> ManifoldsBase.distance(M, f1(x[1], x[2]), f2(x[1], x[2])),
+        [0.0, 0.0],
+        [1.0, 1.0];
+        reltol=1e-2,
+        )
 
-    s = 0
-    xs = 0:0.1:1
-    ys = 0:0.1:1
-    for x in xs
-        for y in ys
-            s = s + ManifoldsBase.distance(M, f1(x, y), f2(x, y))
-        end
-    end
-
-    return s / (length(xs) * length(ys))
+    return I
 end#=}}}=#
 
+# Fitting a grid
+# let#={{{=#
+#     M = Manifolds.Sphere(2)
+
+#     plot_S2(M)
+#     N = [0., 0, 1]::Vector{Float64}; check_point(M, N)
+#     u = [0.1, 1, 0]::Vector{Float64}; check_vector(M, N, u)
+#     v = [1., 0, 0]::Vector{Float64}; check_vector(M, N, v)
+
+#     # S2 is given a linear-ish structure by add() and mult_scal():
+#     add = pa(add_S2, M, N)
+#     mult_scal = pa(mult_scal_S2, M, N)
+
+#     function a_kl(#={{{=#
+#         k::Int64,
+#         l::Int64,
+#         x::Float64,
+#         y::Float64,
+#         )
+
+#         # TODO: normalize u and v?
+#         return add(
+#             mult_scal(sin(k * x), u),
+#             mult_scal(sin(l * y), v)
+#             )
+#     end#=}}}=#
+
+#     function b_kl(#={{{=#
+#         k::Int64,
+#         l::Int64,
+#         x::Float64,
+#         y::Float64,
+#         )
+
+#         # TODO: normalize u and v?
+#         return add(
+#             mult_scal(x^k, u),
+#             mult_scal(y^l, v)
+#             )
+#     end#=}}}=#
+
+#     function c_kl(#={{{=#
+#         k::Int64,
+#         l::Int64,
+#         x::Float64,
+#         y::Float64,
+#         )
+
+#         # TODO: normalize u and v?
+#         return add(
+#             mult_scal(ChebyshevT([i == k for i in range(1, k)])(x), u),
+#             mult_scal(ChebyshevT([i == l for i in range(1, l)])(y), v)
+#             )
+#     end#=}}}=#
+
+#     function f(#={{{=#
+#         c::Array{Float64, 2},
+#         e_kl::Function,
+#         x::Float64,
+#         y::Float64
+#         )
+#         # f is a "weighted sum" of basis functions e_kl
+
+#         (d1, d2) = size(c)
+#         s = N # Initiate s at the origin
+
+#         for i = 1:d1
+#             for j = 1:d2
+#                 s = add(
+#                     s,
+#                     mult_scal(c[i, j], e_kl(i, j, x, y))
+#                     )
+#             end
+#         end
+
+#         return s
+#     end#=}}}=#
+
+#     function a(#={{{=#
+#         x::Float64,
+#         y::Float64
+#         )
+
+#         return add(
+#             mult_scal(y, v),
+#             mult_scal(x, u)
+#             )
+#         # return get_point(M, Manifolds.StereographicAtlas(), :south, [x, y])
+#     end#=}}}=#
+
+#     function b(#={{{=#
+#         x::Float64,
+#         y::Float64,
+#         )
+
+#         p1 = exp(M, N, x * v)
+#         p2 = exp(M, p1, y * u)
+
+#         return p2
+#     end#=}}}=#
+
+#     function obj_fun(c::Array{Float64, 2})::Float64
+#         return distance(M, pa(f, c, a_kl), a)
+#     end
+
+
+#     c0 = fill(0.5, (2, 3))
+#     result = optimize(obj_fun, c0, BFGS())
+#     c_min = Optim.minimizer(result)
+
+#     plotGrid(M, pa(f, c_min, a_kl), labl="f_min", colr="magenta")
+#     plotGrid(M, a, labl="a", colr="cyan")
+#     plot!(M, [N, exp(M, N, u)]; label="u", wireframe=false, geodesic_interpolation=10, linewidth=2)
+#     plot!(M, [N, exp(M, N, v)]; label="v", wireframe=false, geodesic_interpolation=10, linewidth=2)
+# end#=}}}=#
+
+# Fitting a curve
 let#={{{=#
     M = Manifolds.Sphere(2)
 
     plot_S2(M)
     N = [0., 0, 1]::Vector{Float64}; check_point(M, N)
-    u = [0., 1, 0]::Vector{Float64}; check_vector(M, N, u)
+    u = [0.1, 1, 0]::Vector{Float64}; check_vector(M, N, u)
     v = [1., 0, 0]::Vector{Float64}; check_vector(M, N, v)
 
     # S2 is given a linear-ish structure by add() and mult_scal():
     add = pa(add_S2, M, N)
     mult_scal = pa(mult_scal_S2, M, N)
 
-    function e_kl(#={{{=#
+    function a_kl(#={{{=#
         k::Int64,
         l::Int64,
         x::Float64,
@@ -137,7 +255,40 @@ let#={{{=#
             )
     end#=}}}=#
 
-    function f(c::Array{Float64, 2}, x::Float64, y::Float64)#={{{=#
+    function b_kl(#={{{=#
+        k::Int64,
+        l::Int64,
+        x::Float64,
+        y::Float64,
+        )
+
+        # TODO: normalize u and v?
+        return add(
+            mult_scal(x^k, u),
+            mult_scal(y^l, v)
+            )
+    end#=}}}=#
+
+    function c_kl(#={{{=#
+        k::Int64,
+        l::Int64,
+        x::Float64,
+        y::Float64,
+        )
+
+        # TODO: normalize u and v?
+        return add(
+            mult_scal(ChebyshevT([i == k for i in range(1, k)])(x), u),
+            mult_scal(ChebyshevT([i == l for i in range(1, l)])(y), v)
+            )
+    end#=}}}=#
+
+    function f(#={{{=#
+        c::Array{Float64, 2},
+        e_kl::Function,
+        x::Float64,
+        y::Float64
+        )
         # f is a "weighted sum" of basis functions e_kl
 
         (d1, d2) = size(c)
@@ -179,20 +330,16 @@ let#={{{=#
     end#=}}}=#
 
     function obj_fun(c::Array{Float64, 2})::Float64
-        return distance(M, pa(f, c), a)
+        return distance(M, pa(f, c, a_kl), a)
     end
 
 
-    c0 = Array{Float64, 2}(undef, 2, 2)
-    c0[1, 1] = 0.2
-    c0[1, 2] = 0.3
-    c0[2, 1] = -0.7
-    c0[2, 2] = 0.4
+    c0 = fill(0.5, (2, 3))
     result = optimize(obj_fun, c0, BFGS())
     c_min = Optim.minimizer(result)
 
-    plotGrid(M, pa(f, c_min), labl="f_min", colr="magenta")
+    plotGrid(M, pa(f, c_min, a_kl), labl="f_min", colr="magenta")
     plotGrid(M, a, labl="a", colr="cyan")
-    plot!(M, [N, exp(M, N, 0.3 * u)]; label="u", wireframe=false)
-    plot!(M, [N, exp(M, N, 0.3 * v)]; label="v", wireframe=false)
+    plot!(M, [N, exp(M, N, u)]; label="u", wireframe=false, geodesic_interpolation=10, linewidth=2)
+    plot!(M, [N, exp(M, N, v)]; label="v", wireframe=false, geodesic_interpolation=10, linewidth=2)
 end#=}}}=#
