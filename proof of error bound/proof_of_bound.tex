@@ -13,40 +13,7 @@
 
 \maketitle
 
-
-\begin{theorem}[Toponogov]\label{thm:toponogov}
-	Let $M$ be a complete Riemannian manifold with sectional curvature $K \geq H$.
-	Let $\gamma_1$ and $\gamma_2$ be geodesics on $M$ such that $\gamma_1(0) = \gamma_2(0)$.
-	If $H > 0$, assume $\abs{\gamma_1}$, $\abs{\gamma_2} \leq \frac{\pi}{\sqrt{H}}$.
-	Let $\lambda_1$ and $\lambda_2$ be geodesics on a model manifold $N$ of constant curvature $H$ such that
-	\begin{align}
-		\lambda_1(0) ={}& \lambda_2(0),\\
-		\abs{\lambda_1} ={}& \abs{\gamma_1},\\
-		\abs{\lambda_2} ={}& \abs{\gamma_2},\\
-		\angle(\lambda_1, \lambda_2) ={}& \angle(\gamma_1, \gamma_2).
-	\end{align}
-	Then
-	\begin{align}
-		d_{M}(\gamma_1(x), \gamma_2(y)) \leq d_{N}(\lambda_1(x), \lambda_2(y))
-	\end{align}
-	for all $x$, $y \in [0, 1]$.
-\end{theorem}
-
-\begin{lemma}[Spherical and hyperbolic law of cosines]\label{lemma:law_of_cosines}
-	Let $N$ be a manifold of constant curvature $H$.
-	Let $T$ be a geodesic triangle on $N$ with side lengths $A$, $B$, $C$ and angles $a$, $b$, $c$.
-	Then
-	\begin{align}
-		\cos{C \sqrt{H}} ={}& \cos{A \sqrt{H}} \cos{B \sqrt{H}} + \sin{A \sqrt{H}} \sin{B \sqrt{H}} \cos{c}
-	\end{align}
-	if $H > 0$, and
-	\begin{align}
-		\cosh{C \sqrt{\abs{H}}} ={}& \cosh{A \sqrt{\abs{H}}} \cosh{B \sqrt{\abs{H}}} - \sinh{A \sqrt{\abs{H}}} \sinh{B \sqrt{\abs{H}}} \cos{c}
-	\end{align}
-	if $H < 0$.
-\end{lemma}
-
-\begin{theorem}
+\begin{theorem}\label{thm:error_bond_on_manifold}
 	Let $M$ be a Riemannian manifold with sectional curvature bounded from below by $H$ and let $f \from R \to M$ where $R$ is a subset of $\reals^n$ such that its image fits in a single normal coordinate chart $S$ of $M$.
 	Let $p \in M$ and define $g = \operatorname{log}_p \circ f \from R \to S$.
 	Let $\mathhat{g} \from R \to S$ be an approximation of $g$ such that
@@ -75,9 +42,46 @@
 \end{theorem}
 
 \paragraph{Remark} 
-$\frac{\sinh{x}}{x}$ is a locally bounded increasing (on $\reals^+$) function that approches $1$ as $x \to 0$.
+$\frac{\sinh{x}}{x}$ is a locally bounded increasing (on $\reals^+$) function that approaches $1$ as $x \to 0$.
 
-\begin{proof}
+\bigskip
+Let's first state some things that we need in the proof of \cref{thm:error_bond_on_manifold}.
+
+\begin{theorem}[Toponogov]\label{thm:toponogov}
+	Let $M$ be a complete Riemannian manifold with sectional curvature $K \geq H$.
+	Let $\gamma_1$ and $\gamma_2$ be geodesics on $M$ such that $\gamma_1(0) = \gamma_2(0)$.
+	If $H > 0$, assume $\abs{\gamma_1}$, $\abs{\gamma_2} \leq \frac{\pi}{\sqrt{H}}$.
+	Let $\lambda_1$ and $\lambda_2$ be geodesics on a model manifold $N$ of constant curvature $H$ such that
+	\begin{align}
+		\lambda_1(0) ={}& \lambda_2(0),\\
+		\abs{\lambda_1} ={}& \abs{\gamma_1},\\
+		\abs{\lambda_2} ={}& \abs{\gamma_2},\\
+		\angle(\lambda_1, \lambda_2) ={}& \angle(\gamma_1, \gamma_2).
+	\end{align}
+	Then
+	\begin{align}
+		d_{M}(\gamma_1(x), \gamma_2(y)) \leq d_{N}(\lambda_1(x), \lambda_2(y))
+	\end{align}
+	for all $x$, $y$.
+\end{theorem}
+
+\begin{lemma}[Spherical and hyperbolic law of cosines]\label{lemma:law_of_cosines}
+	Let $N$ be a manifold of constant curvature $H$.
+	Let $T$ be a geodesic triangle on $N$ with side lengths $A$, $B$, $C$ and angles $a$, $b$, $c$.
+	Then
+	\begin{align}
+		\cos{C \sqrt{H}} ={}& \cos{A \sqrt{H}} \cos{B \sqrt{H}} + \sin{A \sqrt{H}} \sin{B \sqrt{H}} \cos{c}
+	\end{align}
+	if $H > 0$, and
+	\begin{align}
+		\cosh{C \sqrt{\abs{H}}} ={}& \cosh{A \sqrt{\abs{H}}} \cosh{B \sqrt{\abs{H}}} - \sinh{A \sqrt{\abs{H}}} \sinh{B \sqrt{\abs{H}}} \cos{c}
+	\end{align}
+	if $H < 0$.
+\end{lemma}
+
+\bigskip
+
+\begin{proof}[proof of \cref{thm:error_bond_on_manifold}]
 	Let $N$ be the manifold of constant curvature $H$ and let $q \in N$.
 	Define $h = \operatorname{exp}_{N, q} \circ g$ and $\mathhat{h} = \operatorname{exp}_{N, q} \circ \mathhat{g}$.
 	This is well-defined by requiring that $\abs{g}$, $\abs{\mathhat{g}} < \frac{\pi}{\sqrt{H}}$ when $H > 0$.
