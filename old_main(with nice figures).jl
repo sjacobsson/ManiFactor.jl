@@ -1,4 +1,4 @@
-using Manifolds, ApproxFun, Plots, SplitApplyCombine
+using Manifolds, ApproxFun, Plots
 
 
 #################### Some quality of life functions ####################
@@ -7,99 +7,88 @@ function pa(f,a...) # Partial application{{{
   (b...) -> f(a...,b...)
 end#=}}}=#
 
-function stereographic_projection(#={{{=#
-    xs::Vector{Float64};
-    pole::Int64=1
-    )::Vector{Float64}
-
-    n = length(xs)
-    @assert(pole <= n + 1)
-    ys = zeros(n + 1) # Initialize
-
-    for i in 1:(n + 1)
-        if i < pole
-            ys[i] = (2 * xs[i]) / (1 + norm(xs)^2)
-        elseif i == pole
-            ys[i] = (-1 + norm(xs)^2) / (1 + norm(xs)^2)
-        elseif i > pole
-            ys[i] = (2 * xs[i - 1]) / (1 + norm(xs)^2)
-        end
-    end
+function sproj( # Stereographic projection from the south pole{{{
+    x::Float64,
+    y::Float64
+    )
     
-    return ys
+    return -[
+        2 * x / (1 + x^2 + y^2),
+        2 * y / (1 + x^2 + y^2),
+        (-1 + x^2 + y^2) / (1 + x^2 + y^2)
+        ]
 end#=}}}=#
 
-function inverse_stereographic_projection(#={{{=#
-    ys::Vector{Float64};
-    pole::Int64=1
-    )::Vector{Float64}
-
-    n = length(ys) - 1
-    @assert(pole <= n + 1)
-    xs = zeros(n) # Initialize
-
-    for i in 1:n
-        xs[i] = ys[i] / ys[n + 1]
-    end
+function proju( # Project upwards from xy-plane to hyperbole {{{
+    x::Float64,
+    y::Float64
+    )
     
-    return xs
+    return [
+        x,
+        y,
+        sqrt(1 + x^2 + y^2)
+        ]
 end#=}}}=#
 
 function normalize(x)#={{{=#
     return x / sqrt(x' * x)
 end#=}}}=#
 
+function relu(x)#={{{=#
+    return min(0., x)
+end#=}}}=#
+
 
 #################### Setup ####################
-using Random
-Random.seed!(666)
 
-# f : [-1, 1]^k -> M^n is the function we wish to approximate
+# f : [-1, 1]x[-1, 1] -> M is the function we wish to approximate
 
-k = 2
-n = 3
-M = Sphere(n)
-# f(x) = stereographic_projection([(x[1]^2 - x[2]^2) / 4; x[1] * x[2] / 2]) # Stereographic projection of 1/4 z^2 
-A = rand(n, k)
-f(x) = stereographic_projection(A * x)
+M = Sphere(2)
+f(v) = sproj((v[1]^2 - v[2]^2) / 4, v[1] * v[2] / 2) # Stereographic projection of 1/4 z^2 
+# f(v) = sproj((v[1]^3 - v[2]^4) / 4, v[1] * v[2] / 2)
+# f(v) = normalize([0.9580 -0.2439; 0.3942 0.8628; 0.3899 0.0580] * v + [0.2725, -0.7744, 0.8169]) # Projection onto S^2 of some random affine map : R^2 -> R^3
+
+# M = Hyperbolic(2)
+# f(v) = proju(v[1]^2 - v[2]^2, 2 * v[1] * v[2])
+# f(v) = proju(exp(v[1]) * cos(pi * v[2]), exp(v[1]) * sin(pi * v[2]))
+# f(v) = proju(v[1], v[2] + relu(v[1])^2)
 
 
 #################### Approximate f ####################
 
-function approximate(#={{{=#
-    M::AbstractManifold,
-    # p::Vector{Float64}, # p € M^n
-    f::Function; # f: R^k -> M
-    # chart::Function=pa(exp, M), # chart: T_p M -> M
-    )::Function # : R^k -> M
-
-    # Evaluate f on a point cloud in R^k
-    grid_length = 10
-    fdomain = TensorSpace(repeat([Chebyshev()], k)...)
-    grid = Vector{Vector{Float64}}(points(fdomain, grid_length^k)) # TODO: Use static arrays?
+function approximate_2d(#={{{=#
+    f::Function # f: R^2 -> M
+    )::Function
+    # Evaluate f on a point cloud in R^2
+    grid_length = 5
+    domain = TensorSpace(Chebyshev(), Chebyshev())
+    grid = points(domain, grid_length^2)
     fs = f.(grid)
     # TODO: Is there a better way to choose the domain, e.g. a disk or other shape?
-    
+
     # Linearize M from p (for this we don't need to evaluate f specifically on grid, but why not)
     p = mean(M, fs)
-    B = DefaultOrthonormalBasis()
-    chart = (X -> get_coordinates(M, p, X, B)) ∘ (q -> log(M, p, q)) # log : M -> T_p M, get_coordinates : T_p M -> R^n
-    chart_inv = (X -> exp(M, p, X)) ∘ (X -> get_vector(M, p, X, B)) # get_vector : R^n -> T_p M, exp : T_p M -> M
-
-    gs = chart.(fs)
+    gs = pa(log, M, p).(fs) # gs subset of T_p M
 
     # Compute c_ij in f(x, y) = c_ij T_i(x) T_j(y)
-    cs = [transform(fdomain, [g[i] for g in gs]) for i in 1:n]
+    c1s = transform(domain, [g[1] for g in gs]) # TODO: do this transpose less bodgy
+    c2s = transform(domain, [g[2] for g in gs])
+    c3s = transform(domain, [g[3] for g in gs])
     # TODO: How is this best rewritten to allow for low-rank approximations of f_ij and/or c_ij?
     # TODO: Look into cross adaptive approximation, and the cheb2paper etc
     # TODO: Maybe look at LowRankFun(::Function, ::TensorSpace)
 
     # Approximate the linearized function g = log_p . f
-    ghat(v) = [Fun(fdomain, c)(v) for c in cs] # project(M, p, .) projects to the tangent space
+    ghat1 = Fun(domain, c1s)
+    ghat2 = Fun(domain, c2s)
+    ghat3 = Fun(domain, c3s)
+    ghat(v) = project(M, p, [ghat1(v), ghat2(v), ghat3(v)]) # project to tangent space
+    # TODO: Stay in the tangent space somehow?
     # TODO: since ghat = c_ij T_i T_j, can we use the identity for products of Chebyshev polys?
 
     # Approximate f by exp_p . ghat
-   fhat = chart_inv ∘ ghat
+    fhat = pa(exp, M, p) ∘ ghat
     return fhat
 end#=}}}=#
     
@@ -185,24 +174,9 @@ function plot_image_of_unit_grid(#={{{=#
     yaxis!([-1., 1.]) # BODGE
 end#=}}}=#
 
-fhat = approximate(M, f)
-
-nbr_samples = 100
-ds = zeros(nbr_samples)::Vector{Float64}
-for i in 1:nbr_samples
-    x = ones(k) - 2.0 * rand(k)
-    ds[i] = distance(M, f(x), fhat(x))
-end
-rms_error = sqrt(sum(ds.^2 / nbr_samples))
-
-using Printf
-print("rms error: ")
-@printf("%.1E", rms_error)
-print("\n")
-
-# plot_(M)
-# plot_image_of_unit_grid(M, f;
-#     color="cyan", label="f")
-# plot_image_of_unit_grid(M, fhat;
-#     color="magenta", label="f_hat", linestyle=:dot)
-# plot!([], label=false) # BODGE
+plot_(M)
+plot_image_of_unit_grid(M, f;
+    color="cyan", label="f")
+plot_image_of_unit_grid(M, approximate_2d(f);
+    color="magenta", label="f_hat", linestyle=:dot)
+plot!([], label=false) # BODGE
