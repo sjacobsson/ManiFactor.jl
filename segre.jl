@@ -97,7 +97,7 @@ function rand(#={{{=#
 
     if isnothing(vector_at)
         xs = [normalize(rand(n)) for n in valence]
-        return [rand(1), xs...]
+        return [abs.(rand(1)), xs...]
     else
         xdots = [normalize(rand(n)) for n in valence]
         xdots = map(t -> t[2] - dot(t[2], t[1]) * t[1], zip(vector_at[2:end], xdots))
