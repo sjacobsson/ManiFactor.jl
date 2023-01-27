@@ -1,12 +1,30 @@
-using Manifolds, ApproxFun, Plots, SplitApplyCombine
+import Manifolds:#={{{=#
+    check_point,
+    check_vector,
+    exp,
+    log,
+    norm,
+    distance,
+    embed,
+    rand
+import LinearAlgebra:
+    normalize#=}}}=#
+using#={{{=#
+    ManifoldsBase,
+    Manifolds,
+    LinearAlgebra,
+    Kronecker,
+    SplitApplyCombine, #TODO: is this needed?
+    ApproxFun,
+    Plots#=}}}=#
+
+include("QOL.jl")
+include("Segre.jl")
 
 
-#################### Some quality of life functions ####################
 
-function pa(f,a...) # Partial application{{{
-  (b...) -> f(a...,b...)
-end#=}}}=#
-
+#################### Setup ####################
+#
 function stereographic_projection(#={{{=#
     xs::Vector{Float64};
     pole::Int64=1
@@ -45,23 +63,25 @@ function inverse_stereographic_projection(#={{{=#
     return xs
 end#=}}}=#
 
-function normalize(x)#={{{=#
-    return x / sqrt(x' * x)
-end#=}}}=#
-
-
-#################### Setup ####################
 using Random
 Random.seed!(666)
 
 # f : [-1, 1]^k -> M^n is the function we wish to approximate
 
-k = 2
-n = 3
-M = Sphere(n)
-# f(x) = stereographic_projection([(x[1]^2 - x[2]^2) / 4; x[1] * x[2] / 2]) # Stereographic projection of 1/4 z^2 
-A = rand(n, k)
-f(x) = stereographic_projection(A * x)
+# k = 2
+# n = 3
+# M = Sphere(n)
+# A = rand(n, k)
+# f(x) = stereographic_projection(A * x)
+
+# k = 2
+# n = 3
+# todo = 3 * 2
+# M = ProductManifold(OrthogonalMatrices(n), Euclidean(todo))
+# function f(x::Vector{Float64})
+#     Q, R = qr(X)
+#     return vcat(, flatten(R))
+# end
 
 
 #################### Approximate f ####################
@@ -102,8 +122,8 @@ function approximate(#={{{=#
    fhat = chart_inv ∘ ghat
     return fhat
 end#=}}}=#
-    
-    
+
+
 #################### Plot approximation ####################
 
 ENV["MPLBACKEND"] = "TkAgg" ;# Solves "Warning: No working GUI backend found for matplotlib"
@@ -185,24 +205,26 @@ function plot_image_of_unit_grid(#={{{=#
     yaxis!([-1., 1.]) # BODGE
 end#=}}}=#
 
-fhat = approximate(M, f)
-
-nbr_samples = 100
-ds = zeros(nbr_samples)::Vector{Float64}
-for i in 1:nbr_samples
-    x = ones(k) - 2.0 * rand(k)
-    ds[i] = distance(M, f(x), fhat(x))
-end
-rms_error = sqrt(sum(ds.^2 / nbr_samples))
-
 using Printf
-print("rms error: ")
-@printf("%.1E", rms_error)
-print("\n")
+function main()
+    fhat = approximate(M, f)
 
-# plot_(M)
-# plot_image_of_unit_grid(M, f;
-#     color="cyan", label="f")
-# plot_image_of_unit_grid(M, fhat;
-#     color="magenta", label="f_hat", linestyle=:dot)
-# plot!([], label=false) # BODGE
+    nbr_samples = 100
+    ds = zeros(nbr_samples)::Vector{Float64}
+    for i in 1:nbr_samples
+        x = ones(k) - 2.0 * rand(k)
+        ds[i] = distance(M, f(x), fhat(x))
+    end
+    rms_error = sqrt(sum(ds.^2 / nbr_samples))
+    
+    print("rms error: ")
+    @printf("%.1E", rms_error)
+    print("\n")
+    
+    # plot_(M)
+    # plot_image_of_unit_grid(M, f;
+    #     color="cyan", label="f")
+    # plot_image_of_unit_grid(M, fhat;
+    #     color="magenta", label="f_hat", linestyle=:dot)
+    # plot!([], label=false) # BODGE
+end
