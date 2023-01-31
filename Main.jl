@@ -22,7 +22,6 @@ include("QOL.jl")
 include("Segre.jl")
 
 
-
 #################### Setup ####################
 #
 function stereographic_projection(#={{{=#
@@ -68,58 +67,72 @@ Random.seed!(666)
 
 # f : [-1, 1]^k -> M^n is the function we wish to approximate
 
-# k = 2
-# n = 3
-# M = Sphere(n)
-# A = rand(n, k)
-# f(x) = stereographic_projection(A * x)
+k = 2
+n = 3
+M = Sphere(n)
+A = rand(n, k)
+f(x) = stereographic_projection(A * x)
 
-# k = 2
-# n = 3
-# todo = 3 * 2
-# M = ProductManifold(OrthogonalMatrices(n), Euclidean(todo))
+# k = 4
+# n = Int64(k^2 + (k + 1) * k / 2)
+# M = ProductManifold(
+#     OrthogonalMatrices(k),
+#     Euclidean(Int64((k + 1) * k / 2))
+#     )
+# # TODO: Write better check_point(M::Euclidean, p)?
 # function f(x::Vector{Float64})
-#     Q, R = qr(X)
-#     return vcat(, flatten(R))
+#     # Assert that the entries of x fit in a square matrix
+#     l = Int64(sqrt(length(x)))
+#     @assert(length(x) == l^2)
+#     Q, R = qr(reshape(x, l, l))
+#     vec_R = [R[i, j] for i in 1:l for j in 1:l if i <= j] # Flatten upper triangular part of R
+#     return ProductRepr(Q, vec_R)
 # end
 
+# println(check_point(M, (Q))
 
 #################### Approximate f ####################
 
-function approximate(#={{{=#
-    M::AbstractManifold,
-    # p::Vector{Float64}, # p € M^n
-    f::Function; # f: R^k -> M
-    # chart::Function=pa(exp, M), # chart: T_p M -> M
-    )::Function # : R^k -> M
+function cheb2d(
+    g::Function,# R^k -> R^n
+    )::Function# R^k -> R^n
+    # TODO: don't hardcode in grid_length, k, n?
 
-    # Evaluate f on a point cloud in R^k
     grid_length = 10
     fdomain = TensorSpace(repeat([Chebyshev()], k)...)
-    grid = Vector{Vector{Float64}}(points(fdomain, grid_length^k)) # TODO: Use static arrays?
-    fs = f.(grid)
-    # TODO: Is there a better way to choose the domain, e.g. a disk or other shape?
+    grid = Vector{Vector{Float64}}(points(fdomain, grid_length^k))
+
+    gs = g.(grid)
+
+    # Compute c_ij in f(x, y) = c_ij T_i(x) T_j(y)
+    cs = [transform(fdomain, [y[i] for y in gs]) for i in 1:n]
+
+    return v -> [Fun(fdomain, c)(v) for c in cs]
+end
+
+
+# approximate :: M^n -> (R^k -> M^n) -> (R^k -> M^n)
+# approximate_linear :: (R^k -> R^n) -> (R^k -> R^n)
+function approximate(#={{{=#
+    M::AbstractManifold,
+    f::Function; # :: R^k -> M^n
+    approximate_linear=cheb2d::Function # :: (R^k -> R^n) -> (R^k -> R^n)
+    # TODO: chart
+    )::Function # :: R^k -> M^n
+
+    # Evaluate f on a point cloud in [-1, 1]^k
+    xs = [2.0 * rand(k) .- 1.0 for _ in 1:100]
+    fs = f.(xs)
     
-    # Linearize M from p (for this we don't need to evaluate f specifically on grid, but why not)
+    # Choose a point on M and linearize from there
     p = mean(M, fs)
     B = DefaultOrthonormalBasis()
     chart = (X -> get_coordinates(M, p, X, B)) ∘ (q -> log(M, p, q)) # log : M -> T_p M, get_coordinates : T_p M -> R^n
-    chart_inv = (X -> exp(M, p, X)) ∘ (X -> get_vector(M, p, X, B)) # get_vector : R^n -> T_p M, exp : T_p M -> M
+    chart_inv = (X -> exp(M, p, X)) ∘ (X -> get_vector(M, p, X, B)) # get_vector : R^n -> T_p M, exp : T_p M -> M^n
 
-    gs = chart.(fs)
-
-    # Compute c_ij in f(x, y) = c_ij T_i(x) T_j(y)
-    cs = [transform(fdomain, [g[i] for g in gs]) for i in 1:n]
-    # TODO: How is this best rewritten to allow for low-rank approximations of f_ij and/or c_ij?
-    # TODO: Look into cross adaptive approximation, and the cheb2paper etc
-    # TODO: Maybe look at LowRankFun(::Function, ::TensorSpace)
-
-    # Approximate the linearized function g = log_p . f
-    ghat(v) = [Fun(fdomain, c)(v) for c in cs] # project(M, p, .) projects to the tangent space
-    # TODO: since ghat = c_ij T_i T_j, can we use the identity for products of Chebyshev polys?
-
-    # Approximate f by exp_p . ghat
-   fhat = chart_inv ∘ ghat
+    g = chart ∘ f
+    ghat = approximate_linear(g)
+    fhat = chart_inv ∘ ghat
     return fhat
 end#=}}}=#
 

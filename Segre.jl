@@ -119,14 +119,15 @@ function embed_vector(#={{{=#
     ) where {valence, F}
 
     # Product rule
-    s = zeros.(prod(length.(p)))
-    for (i, xdot) in enumerate(v)
-        p_ = deepcopy(p)
-        p_[i] = xdot
-        term = kronecker(p_...)[:, 1]
-        s = s + term
-    end
-    return s
+    return sum([
+        kronecker([
+            i == j ?
+            xdot :
+            x
+            for (j, (x, xdot)) in enumerate(zip(p, v))
+            ]...)[:, 1]
+        for (i, _) in enumerate(p)
+        ])
 end#=}}}=#
 
 # Theorem 1.1 in Swijsen21
