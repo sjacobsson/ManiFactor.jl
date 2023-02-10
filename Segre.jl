@@ -219,150 +219,42 @@ end# }}}
 
 
 ###### TESTS ######
+include("Tests.jl")
 
+max_order = 4
+nbr_tests = 20
+dimension_range = range(2, 7) # check_point not implemented for 0-spheres, which seems sane
 
-# TODO: run tests for d > 3 since that's where we have to start checking compatability
-function test_segre(;verbose=false)#={{{=#
-    nbr_tests = 5
-    max_order = 3
-    dimension_range = range(2, 7) # check_point not implemented for 0-spheres, which seems sane
-    # TODO: test cases m = 0 and lambdadot = 0 also?
-
-    println("########### Testing that exp maps into the manifold. ###########")
-    for order in 1:max_order#={{{=#
+function test_segre()#={{{=#
+    println("Testing that exp maps to the manifold.")
+    for order in 1:max_order
         for _ in 1:nbr_tests
-            valence = Tuple([rand(dimension_range) for _ in 1:order])
-            M = Segre(valence)
-            if verbose
-                println("valence ", valence)
-            end
-        
-            p = rand(M)
-            if verbose
-                println("p = ", map(y -> map((x -> round(x; digits=2)), y), p))
-            end
-        
-            v = rand(M; vector_at=p)
-            if verbose
-                println("v = ", map(y -> map((x -> round(x; digits=2)), y), v))
-                println()
-            end
-            
-            e = check_point(M, p)
-            if !isnothing(e); throw(e); end
-            e = check_vector(M, p, v)
-            if !isnothing(e); throw(e); end
-            e = check_point(M, exp(M, p, v))
-            if !isnothing(e); throw(e); end
+            v = Tuple([rand(dimension_range) for _ in 1:order])
+            test_exp(Segre(v))
         end
-    end#=}}}=#
-
-    println("############ Testing that geodesics are unit speed. ############")
-    for order in 1:max_order#={{{=#
-        for _ in 1:nbr_tests
-            valence = Tuple([rand(dimension_range) for _ in 1:order])
-            M = Segre(valence)
-            if verbose
-                println("valence ", valence)
-            end
+    end
     
-            p = rand(M)
-            if verbose
-                println("p = ", map(y -> map((x -> round(x; digits=2)), y), p))
-            end
-        
-            v = normalize(M, p, rand(M, vector_at=p))
-            if verbose
-                println("v = ", map(y -> map((x -> round(x; digits=2)), y), v))
-                println()
-            end
-
-            geodesic_speed = norm(
-                finite_difference(
-                    t -> embed(M, exp(M, p, t * v)),
-                    rand(),
-                    1e-6
-                    )
-                )
-            @assert(isapprox(geodesic_speed, 1.0))
-        end
-    end#=}}}=#
-
-    println("###### Testing that geodesics only have normal curvature. ######")
-    for order in 1:max_order#={{{=#
+    println("Testing that geodesics are unit speed.")
+    for order in 1:max_order
         for _ in 1:nbr_tests
-            valence = Tuple([rand(dimension_range) for _ in 1:order])
-            M = Segre(valence)
-            if verbose
-                println("valence ", valence)
-            end
-        
-            p = rand(M)
-            if verbose
-                println("p = ", map(y -> map((x -> round(x; digits=2)), y), p))
-            end
-        
-            v = rand(M; vector_at=p)
-            if verbose
-                println("v = ", map(y -> map((x -> round(x; digits=2)), y), v))
-                println()
-            end
-            
-            gamma(t) = embed(M, exp(M, p, t * v))
-            n = finite_difference(gamma, 0.0, 1e-6; order=2) # Normal curvature vector at p
-            v_ = embed_vector(M, p, rand(M, vector_at=p)) # Random Tangent vector at p
-            @assert(isapprox(dot(n, v_), 0.0, atol=1e-6))
+            v = Tuple([rand(dimension_range) for _ in 1:order])
+            test_geodesic_speed(Segre(v))
         end
-    end#=}}}=#
-
-    println("########## Testing that log is a left inverse of exp. ##########")
-    for order in 1:max_order#={{{=#
-        for _ in 1:nbr_tests
-            valence = Tuple([rand(dimension_range) for _ in 1:order])
-            M = Segre(valence)
-            if verbose
-                println("valence ", valence)
-            end
+    end
     
-            p = rand(M)
-            if verbose
-                println("p = ", map(y -> map((x -> round(x; digits=2)), y), p))
-            end
-        
-            v = rand(M, vector_at=p)
-            if verbose
-                println("v = ", map(y -> map((x -> round(x; digits=2)), y), v))
-                println()
-            end
-
-            v_ = log(M, p, exp(M, p, v))
-            @assert(isapprox(v, v_))
-        end
-    end#=}}}=#
-
-    println("########## Testing that exp is a left inverse of log. ##########")
-    for order in 1:max_order#={{{=#
+    println("Testing that geodesics only have normal curvature.")
+    for order in 1:max_order
         for _ in 1:nbr_tests
-            valence = Tuple([rand(dimension_range) for _ in 1:order])
-            M = Segre(valence)
-            if verbose
-                println("valence ", valence)
-            end
-    
-            p = rand(M)
-            q = rand(M)
-            if verbose
-                println("p = ", map(y -> map((x -> round(x; digits=2)), y), p))
-                println("q = ", map(y -> map((x -> round(x; digits=2)), y), q))
-                println()
-            end
-
-            q_ = exp(M, p, log(M, p, q))
-            @assert(isapprox(q, q_))
+            v = Tuple([rand(dimension_range) for _ in 1:order])
+            test_geodesic_curvature(Segre(v))
         end
-    end#=}}}=#
-
-    # TODO: Test that these are equal?
-    # println(norm(M, p, v))
-    # println(norm(embed_vector(M, p, v)))
+    end
+    
+    println("Testing that log is inverse of exp.")
+    for order in 1:max_order
+        for _ in 1:nbr_tests
+            v = Tuple([rand(dimension_range) for _ in 1:order])
+            test_log(Segre(v))
+        end
+    end
 end#=}}}=#

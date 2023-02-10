@@ -20,6 +20,7 @@ using#={{{=#
 
 include("QOL.jl")
 include("Segre.jl")
+# TODO: Go through all of the code and replace all @asserts with smthing else as assert may be turned off as an aoptimization
 
 
 #################### Setup ####################
@@ -67,18 +68,30 @@ Random.seed!(666)
 
 # f : [-1, 1]^k -> M^n is the function we wish to approximate
 
-k = 2
-n = 3
-M = Sphere(n)
-A = rand(n, k)
-f(x) = stereographic_projection(A * x)
+# k = 2
+# n = 3
+# M = Sphere(n)
+# A = rand(n, k)
+# f(x) = stereographic_projection(A * x)
+
+m = 4
+M = OrthogonalMatrices(k)
+n = manifold_dimension(M)
+function f(x::Vector{Float64})
+    # Assert that the entries of x fit in a square matrix
+    l = Int64(sqrt(length(x)))
+    @assert(length(x) == l^2)
+    Q, _ = qr(reshape(x, l, l))
+    return Q
+end
 
 # k = 4
-# n = Int64(k^2 + (k + 1) * k / 2)
+# # n = Int64(k^2 + (k + 1) * k / 2)
 # M = ProductManifold(
 #     OrthogonalMatrices(k),
 #     Euclidean(Int64((k + 1) * k / 2))
 #     )
+# n = manifold_dimension(M)
 # # TODO: Write better check_point(M::Euclidean, p)?
 # function f(x::Vector{Float64})
 #     # Assert that the entries of x fit in a square matrix
@@ -93,13 +106,12 @@ f(x) = stereographic_projection(A * x)
 
 #################### Approximate f ####################
 
-function cheb2d(
+function cheb2(#={{{=#
     g::Function,# R^k -> R^n
     )::Function# R^k -> R^n
-    # TODO: don't hardcode in grid_length, k, n?
 
     grid_length = 10
-    fdomain = TensorSpace(repeat([Chebyshev()], k)...)
+    fdomain = TensorSpace(repeat([Chebyshev()], k)...) # assumes k = 2
     grid = Vector{Vector{Float64}}(points(fdomain, grid_length^k))
 
     gs = g.(grid)
@@ -108,15 +120,66 @@ function cheb2d(
     cs = [transform(fdomain, [y[i] for y in gs]) for i in 1:n]
 
     return v -> [Fun(fdomain, c)(v) for c in cs]
-end
+end#=}}}=#
 
+# Adaptive Cross Approximation of scalar valued functions using products of Chebyshev polynomials as a basis
+u = rand(m) # BODGE
+import Optim: optimize, minimizer, Fminbox
+function aca(#={{{=#
+    f;# R^k -> R^n
+    tol = 1e-6::Float64
+    )# R^k -> R^n
+    # The implementation is similar to Townsend's and Trefethen's cheb2paper fig. 2.1
 
-# approximate :: M^n -> (R^k -> M^n) -> (R^k -> M^n)
-# approximate_linear :: (R^k -> R^n) -> (R^k -> R^n)
+    # Initialize
+    es = push!([], f)
+    gs = push!([], _ -> 0.0)
+    error = Inf
+
+    # Define a domain
+    lower = -1.0 * ones(m)
+    upper = ones(m)
+
+    k = 1
+    while abs(error) > tol
+        e = deepcopy(es[k])
+        g = deepcopy(gs[k])
+
+        x_min = minimizer(optimize(
+            x -> -abs(e(x)),
+            lower,
+            upper,
+            2.0 * rand(m) .- 1.0,
+            Fminbox()
+            ))
+        error = e(x_min)
+        println(abs(error))
+
+        # for j in 1:m
+        e_restricted = [t -> e([x_min[1:j-1]..., t, x_min[j+1:end]...]) for j in 1:m]
+        nbr_interpolation_points = 1000 # TODO: Make this grow
+        factors = [Fun(
+            Chebyshev(),
+            ApproxFun.transform(
+                Chebyshev(),
+                e_restricted[j].(points(Chebyshev(), nbr_interpolation_points)) / error)
+            ) for j in 1:m]
+
+        push!(es, x -> e(x) - error * prod(a(t) for (a, t) in zip(factors, x)))
+        push!(gs, x -> g(x) + error * prod(a(t) for (a, t) in zip(factors, x)))
+        k = k + 1
+    end
+
+    return gs[end]
+end#=}}}=#
+# TODO: Use succesively more Chebyshev points in the chebfuns, we don't need floating-point precision from the start.
+# TODO: Use several guesses when computing x_min
+# TODO: Right now chebk assumes g is scalar-valued
+
 function approximate(#={{{=#
     M::AbstractManifold,
     f::Function; # :: R^k -> M^n
-    approximate_linear=cheb2d::Function # :: (R^k -> R^n) -> (R^k -> R^n)
+    approximate_linear=aca::Function # :: (R^k -> R^n) -> (R^k -> R^n)
     # TODO: chart
     )::Function # :: R^k -> M^n
 
@@ -138,7 +201,6 @@ end#=}}}=#
 
 
 #################### Plot approximation ####################
-
 ENV["MPLBACKEND"] = "TkAgg" ;# Solves "Warning: No working GUI backend found for matplotlib"
 pyplot()
 
