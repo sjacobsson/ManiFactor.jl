@@ -74,3 +74,41 @@ function test_log(#={{{=#
     @assert(isapprox(v, log(M, p, exp(M, p, v))))
     @assert(isapprox(q, exp(M, p, log(M, p, q))))
 end#=}}}=#
+
+function main()#={{{=#
+    max_order = 4
+    nbr_tests = 20
+    dimension_range = range(2, 7) # check_point not implemented for 0-spheres, which seems sane
+
+    println("Testing that exp maps to the manifold.")
+    for order in 1:max_order
+        for _ in 1:nbr_tests
+            v = Tuple([rand(dimension_range) for _ in 1:order])
+            test_exp(Segre(v))
+        end
+    end
+    
+    println("Testing that geodesics are unit speed.")
+    for order in 1:max_order
+        for _ in 1:nbr_tests
+            v = Tuple([rand(dimension_range) for _ in 1:order])
+            test_geodesic_speed(Segre(v))
+        end
+    end
+    
+    println("Testing that geodesics only have normal curvature.")
+    for order in 1:max_order
+        for _ in 1:nbr_tests
+            v = Tuple([rand(dimension_range) for _ in 1:order])
+            test_geodesic_curvature(Segre(v))
+        end
+    end
+    
+    println("Testing that log is inverse of exp.")
+    for order in 1:max_order
+        for _ in 1:nbr_tests
+            v = Tuple([rand(dimension_range) for _ in 1:order])
+            test_log(Segre(v))
+        end
+    end
+end#=}}}=#

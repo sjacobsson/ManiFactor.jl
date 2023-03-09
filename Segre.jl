@@ -1,4 +1,18 @@
-# Seg(P^n1 x ... P^nd) ~ R+ x S^(n1 - 1) x ... x S^(nd - 1)
+import Manifolds:#={{{=#
+    check_point,
+    check_vector,
+    exp,
+    log,
+    norm,
+    distance,
+    embed,
+    rand
+using
+    ManifoldsBase,
+    Manifolds
+#=}}}=#
+
+# Seg(P^n1 x ... P^nd) ~ R^+ x S^(n1 - 1) x ... x S^(nd - 1)
 struct
     Segre{V, 𝔽} <: AbstractManifold{𝔽}
 end
@@ -10,9 +24,6 @@ function Segre(#={{{=#
 
     return Segre{valence, field}()
 end#=}}}=#
-
-
-###### FUNCTIONS ON Seg ######
 
 valence(::Segre{V, 𝔽}) where {V, 𝔽} = V
 ndims(::Segre{V, 𝔽}) where {V, 𝔽} = length(V)
@@ -60,20 +71,19 @@ function check_vector(#={{{=#
     return nothing
 end#=}}}=#
 
+# TODO
 function to_tucker(M::Segre)::Tucker#={{{=#
-    # TODO
 end#=}}}=#
 
 # TODO
-# function dot(#={{{=#
-#     M::Segre{valence, F},
-#     p::Vector{Vector{Float64}},
-#     u::Vector{Vector{Float64}},
-#     v::Vector{Vector{Float64}}
-#     ) where {valence, F}
+function dot(#={{{=#
+    M::Segre{valence, F},
+    p::Vector{Vector{Float64}},
+    u::Vector{Vector{Float64}},
+    v::Vector{Vector{Float64}}
+    )::Float64 where {valence, F}
 
-#     # TODO
-# end#=}}}=#
+end#=}}}=#
 
 function norm(#={{{=#
     M::Segre{valence, F},
@@ -216,45 +226,3 @@ function distance(# {{{
     # TODO: Write down the closed-form expression for the distance
     return norm(M, p, log(M, p, q))
 end# }}}
-
-
-###### TESTS ######
-include("Tests.jl")
-
-max_order = 4
-nbr_tests = 20
-dimension_range = range(2, 7) # check_point not implemented for 0-spheres, which seems sane
-
-function test_segre()#={{{=#
-    println("Testing that exp maps to the manifold.")
-    for order in 1:max_order
-        for _ in 1:nbr_tests
-            v = Tuple([rand(dimension_range) for _ in 1:order])
-            test_exp(Segre(v))
-        end
-    end
-    
-    println("Testing that geodesics are unit speed.")
-    for order in 1:max_order
-        for _ in 1:nbr_tests
-            v = Tuple([rand(dimension_range) for _ in 1:order])
-            test_geodesic_speed(Segre(v))
-        end
-    end
-    
-    println("Testing that geodesics only have normal curvature.")
-    for order in 1:max_order
-        for _ in 1:nbr_tests
-            v = Tuple([rand(dimension_range) for _ in 1:order])
-            test_geodesic_curvature(Segre(v))
-        end
-    end
-    
-    println("Testing that log is inverse of exp.")
-    for order in 1:max_order
-        for _ in 1:nbr_tests
-            v = Tuple([rand(dimension_range) for _ in 1:order])
-            test_log(Segre(v))
-        end
-    end
-end#=}}}=#

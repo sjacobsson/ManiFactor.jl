@@ -1,3 +1,6 @@
+import LinearAlgebra:
+    normalize
+
 # Just some quality of life functions
 #
 # Partial application

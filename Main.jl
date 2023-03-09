@@ -1,30 +1,17 @@
-import Manifolds:#={{{=#
-    check_point,
-    check_vector,
-    exp,
-    log,
-    norm,
-    distance,
-    embed,
-    rand
-import LinearAlgebra:
-    normalize#=}}}=#
 using#={{{=#
     ManifoldsBase,
     Manifolds,
-    LinearAlgebra,
-    Kronecker,
+    Kronecker, # TODO: is this needed?
     SplitApplyCombine, #TODO: is this needed?
-    ApproxFun,
     Plots#=}}}=#
 
 include("QOL.jl")
 include("Segre.jl")
-# TODO: Go through all of the code and replace all @asserts with smthing else as assert may be turned off as an aoptimization
+include("Aca.jl")
 
 
 #################### Setup ####################
-#
+
 function stereographic_projection(#={{{=#
     xs::Vector{Float64};
     pole::Int64=1
@@ -75,7 +62,7 @@ Random.seed!(666)
 # f(x) = stereographic_projection(A * x)
 
 m = 4
-M = OrthogonalMatrices(k)
+M = OrthogonalMatrices(m)
 n = manifold_dimension(M)
 function f(x::Vector{Float64})
     # Assert that the entries of x fit in a square matrix
@@ -107,11 +94,11 @@ end
 #################### Approximate f ####################
 
 function cheb2(#={{{=#
-    g::Function,# R^k -> R^n
-    )::Function# R^k -> R^n
+    g::Function,# R^2 -> R^n
+    )::Function# R^2 -> R^n
 
     grid_length = 10
-    fdomain = TensorSpace(repeat([Chebyshev()], k)...) # assumes k = 2
+    fdomain = TensorSpace(repeat([Chebyshev()], k)...)
     grid = Vector{Vector{Float64}}(points(fdomain, grid_length^k))
 
     gs = g.(grid)
@@ -122,66 +109,12 @@ function cheb2(#={{{=#
     return v -> [Fun(fdomain, c)(v) for c in cs]
 end#=}}}=#
 
-# Adaptive Cross Approximation of scalar valued functions using products of Chebyshev polynomials as a basis
-u = rand(m) # BODGE
-import Optim: optimize, minimizer, Fminbox
-function aca(#={{{=#
-    f;# R^k -> R^n
-    tol = 1e-6::Float64
-    )# R^k -> R^n
-    # The implementation is similar to Townsend's and Trefethen's cheb2paper fig. 2.1
-
-    # Initialize
-    es = push!([], f)
-    gs = push!([], _ -> 0.0)
-    error = Inf
-
-    # Define a domain
-    lower = -1.0 * ones(m)
-    upper = ones(m)
-
-    k = 1
-    while abs(error) > tol
-        e = deepcopy(es[k])
-        g = deepcopy(gs[k])
-
-        x_min = minimizer(optimize(
-            x -> -abs(e(x)),
-            lower,
-            upper,
-            2.0 * rand(m) .- 1.0,
-            Fminbox()
-            ))
-        error = e(x_min)
-        println(abs(error))
-
-        # for j in 1:m
-        e_restricted = [t -> e([x_min[1:j-1]..., t, x_min[j+1:end]...]) for j in 1:m]
-        nbr_interpolation_points = 1000 # TODO: Make this grow
-        factors = [Fun(
-            Chebyshev(),
-            ApproxFun.transform(
-                Chebyshev(),
-                e_restricted[j].(points(Chebyshev(), nbr_interpolation_points)) / error)
-            ) for j in 1:m]
-
-        push!(es, x -> e(x) - error * prod(a(t) for (a, t) in zip(factors, x)))
-        push!(gs, x -> g(x) + error * prod(a(t) for (a, t) in zip(factors, x)))
-        k = k + 1
-    end
-
-    return gs[end]
-end#=}}}=#
-# TODO: Use succesively more Chebyshev points in the chebfuns, we don't need floating-point precision from the start.
-# TODO: Use several guesses when computing x_min
-# TODO: Right now chebk assumes g is scalar-valued
-
 function approximate(#={{{=#
     M::AbstractManifold,
-    f::Function; # :: R^k -> M^n
-    approximate_linear=aca::Function # :: (R^k -> R^n) -> (R^k -> R^n)
+    f::Function; # :: R^m -> M^n
+    approximate_linear=aca::Function # :: (R^m -> R^n) -> (R^m -> R^n)
     # TODO: chart
-    )::Function # :: R^k -> M^n
+    )::Function # :: R^m -> M^n
 
     # Evaluate f on a point cloud in [-1, 1]^k
     xs = [2.0 * rand(k) .- 1.0 for _ in 1:100]
@@ -281,7 +214,7 @@ function plot_image_of_unit_grid(#={{{=#
 end#=}}}=#
 
 using Printf
-function main()
+function main()#={{{=#
     fhat = approximate(M, f)
 
     nbr_samples = 100
@@ -302,4 +235,4 @@ function main()
     # plot_image_of_unit_grid(M, fhat;
     #     color="magenta", label="f_hat", linestyle=:dot)
     # plot!([], label=false) # BODGE
-end
+end#=}}}=#
