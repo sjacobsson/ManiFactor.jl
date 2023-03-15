@@ -3,11 +3,16 @@ import Optim: optimize, minimizer, Fminbox, Options
 using ApproxFun
 # All of these are pretty slow currently
 
-nbr_terms = 10
-nbr_interpolation_points = 10
+Aca=Array{Float64, 3}
+
+nbr_terms = 20
+nbr_interpolation_points = 100
 nbr_loops = 5
 
+
 # Evaluate an acapproximation
+# t = Array{Float64, 2}(undef, size(a)[2:3])
+# b = Array{Float64, 2}(undef, size(a)[1:2])
 function eval_aca(#={{{=#
     a::Aca,
     x::Vector{Float64};
@@ -15,10 +20,7 @@ function eval_aca(#={{{=#
 
     # TODO: asserts?
     
-    nbr_terms = size(a)[1]
-    nbr_interpolation_points = size(a)[3]
-
-    t = Array{Float64, 2}(undef, size(a)[2:3])
+    t = Array{Float64, 2}(undef, (m, nbr_interpolation_points))
     for j in 1:m
         # t[j, :] = [cos((k - 1) * acos(x[j])) for k in 1:nbr_interpolation_points]
         t[j, 1] = 1
@@ -28,7 +30,7 @@ function eval_aca(#={{{=#
         end
     end
 
-    b = Array{Float64, 2}(undef, size(a)[1:2])
+    b = Array{Float64, 2}(undef, (nbr_terms, m))
     for j in 1:m
         for i in 1:nbr_terms
             b[i, j] = t[j, :]' * a[i, j, :]
