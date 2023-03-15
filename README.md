@@ -2,7 +2,7 @@
 
 `Segre.jl` implements the Segre manifold of rank 1 tensors as an `AbstractManifold` from the `Manifolds.jl` package.
 
-`Aca.jl` implements adaptive cross approximation for approximating functions of the type $$\mathbb{R}^m \to \mathbb{R}^n$$.
+`Aca.jl` implements adaptive cross approximation for approximating functions of the type $$\mathbb{R}^m \to \mathbb{R}^n.$$
 
 `Main.jl` extends the adaptive cross approximation method to functions of the type $$\mathbb{R}^n \to M^n$$ where $M^n$ is an $n$-dimensional manifold.
 

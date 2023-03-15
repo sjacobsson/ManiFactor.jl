@@ -1,125 +1,186 @@
 # Adaptive Cross Approximation of scalar valued functions using products of Chebyshev polynomials as a basis
 import Optim: optimize, minimizer, Fminbox, Options
 using ApproxFun
+# All of these are pretty slow currently
 
-function aca_1d(#={{{=#
-    f;# R^m -> R
-    tol = 1e-2::Float64
-    )# R^m -> R
-    # The implementation is similar to Townsend's and Trefethen's cheb2paper fig. 2.1
+nbr_terms = 10
+nbr_interpolation_points = 10
+nbr_loops = 5
+
+# Evaluate an acapproximation
+function eval_aca(#={{{=#
+    a::Aca,
+    x::Vector{Float64};
+    )::Float64
+
+    # TODO: asserts?
     
-    # TODO: Use @time to optimize
+    nbr_terms = size(a)[1]
+    nbr_interpolation_points = size(a)[3]
 
-    # Initialize
-    fhat = x -> 0.0
-    error = Inf
-
-    # Define a domain
-    lower = -1.0 * ones(m)
-    upper = ones(m)
-
-    k = 1
-    while abs(error) > tol
-
-        # Estimate argmax of abs ∘ f
-        x_k = minimizer(optimize(
-            x -> -abs(f(x) - fhat(x)),
-            lower,
-            upper,
-            2.0 * rand(m) .- 1.0,
-            Fminbox(),
-            Options(iterations=100)
-            ))
-
-        error = f(x_k) - fhat(x_k)
-        println(abs(error))
-
-        factors = [Fun(t -> f([x_k[1:j-1]..., t, x_k[j+1:end]...]) - fhat([x_k[1:j-1]..., t, x_k[j+1:end]...])) for j in 1:m]
-
-        fhat_(x) = deepcopy(fhat(x) + prod([a(t) for (a, t) in zip(factors, x)]) * error^(1 - m))
-        fhat = deepcopy(fhat_)
-        k = k + 1
+    t = Array{Float64, 2}(undef, size(a)[2:3])
+    for j in 1:m
+        # t[j, :] = [cos((k - 1) * acos(x[j])) for k in 1:nbr_interpolation_points]
+        t[j, 1] = 1
+        t[j, 2] = x[j]
+        for k in 3:nbr_interpolation_points
+            t[j, k] = 2 * x[j] * t[j, k - 1] - t[j, k - 2]
+        end
     end
 
-    return fhat
+    b = Array{Float64, 2}(undef, size(a)[1:2])
+    for j in 1:m
+        for i in 1:nbr_terms
+            b[i, j] = t[j, :]' * a[i, j, :]
+        end
+    end
+    # TODO: compute Chebyshev polynomials more efficiently?
+
+    return sum(mapslices(prod, b, dims=[2]))
 end#=}}}=#
 
-# TODO: optimize aca_1d before starting with this one!
-function aca_1d_(#={{{=#
-    f;# R^m -> R
-    tol = 1e-2::Float64
-    )# R^m -> R
-    # The implementation is similar to what Raf told me about doing one variable at the time
+# A normal ACA implementation
+function aca_scalar(#={{{=#
+    f::Function;# R^m -> R
+    nbr_terms::Int64=nbr_terms,
+    nbr_interpolation_points::Int64=nbr_interpolation_points
+    )::Function# R^m -> R
     
+    # TODO: [T_i(x_j)] is constant, so it would suffice to compute it once?
+
     # Initialize
-    fhat = x -> 0.0
-    error = Inf
+    fhat::Aca = zeros(nbr_terms, m, nbr_interpolation_points)
+    error::Float64 = Inf
 
     # Define a domain
-    lower = -1.0 * ones(m)
-    upper = ones(m)
+    lower::Float64 = -1.0
+    upper::Float64 = 1.0
 
-    k = 1
-    while abs(error) > tol
+    # while abs(error) > tol
+    for i = 1:nbr_terms
 
         # Estimate argmax of abs ∘ f
-        x_k = minimizer(optimize(
-            x -> -abs(f(x) - fhat(x)),
+        xi::Vector{Float64} = rand(m)
+        for j in 1:nbr_loops*m
+            j_ = (j - 1)%m + 1
+            xi[j_] = minimizer(optimize(
+                t -> -(f - pa(eval_aca, fhat))([xi[1:j_-1]..., t, xi[j_+1:end]...])^2,
+                lower,
+                upper
+                ))
+        end
+
+        error = (f - pa(eval_aca, fhat))(xi)
+        println(abs(error))
+
+        for j in 1:m
+            if j == 1
+                g = t -> (f - pa(eval_aca, fhat))([xi[1:j-1]..., t, xi[j+1:end]...])
+            else
+                g = t -> (f - pa(eval_aca, fhat))([xi[1:j-1]..., t, xi[j+1:end]...]) / error
+            end
+            fhat[i, j, :] = transform(
+                Chebyshev(),
+                g.(points(Chebyshev(), nbr_interpolation_points))
+                )
+        end
+    end
+
+    return pa(eval_aca, fhat)
+end#=}}}=#
+
+# An ACA implementation that optimizes over the whole of R^m at once rather than one dimension at the time
+function aca_scalar_(#={{{=#
+    f::Function;# R^m -> R
+    nbr_terms::Int64=nbr_terms,
+    nbr_interpolation_points::Int64=nbr_interpolation_points
+    )::Function# R^m -> R
+    
+    # TODO: [T_i(x_j)] is constant, so it would suffice to compute it once?
+
+    # Initialize
+    fhat::Aca = zeros(nbr_terms, m, nbr_interpolation_points)
+    error::Float64 = Inf
+
+    # Define a domain
+    lower::Vector{Float64} = -1.0 * ones(m)
+    upper::Vector{Float64} = ones(m)
+
+    # while abs(error) > tol
+    for i = 1:nbr_terms
+
+        # Estimate argmax of abs ∘ f
+        xi::Vector{Float64} = minimizer(optimize(
+            x -> -((f - pa(eval_aca, fhat))(x))^2,
             lower,
             upper,
             2.0 * rand(m) .- 1.0,
             Fminbox(),
-            Optim.Options(iterations=100)
+            Options(iterations=10)
             ))
 
-        # error = 0.0
-        # x_max = rank(m)
-        # for _ in 1:100
-        #     x = rand(m)
-        #     if abs(e(x)) > abs(error)
-        #         x_max = x
-        #         error = e(x_max)
-        #     end
-        # end
-
-        # error = 0.0
-        # x_max = rank(m)
-        # for _ in 1:10
-        #     x = rand(m)
-            
-        #     for _ in 1:10
-        #     for k in 1:m
-        #         x_k = minimizer(optimize(
-        #             t -> -abs(e([x[1:k-1]..., t, x[k+1:end]...])),
-        #             -1.0,
-        #             1.0
-        #             ))
-    
-        #         x[k] = x_k
-        #     end
-        #     end
-
-        #     x_max = x
-        #     error = e(x_max)
-        # end
-
-        error = f(x_k) - fhat(x_k)
+        error = (f - pa(eval_aca, fhat))(xi)
         println(abs(error))
 
-        factors = [Fun(t -> f([x_k[1:j-1]..., t, x_k[j+1:end]...]) - fhat([x_k[1:j-1]..., t, x_k[j+1:end]...])) for j in 1:m]
+        for j in 1:m
+            if j == 1
+                g = t -> (f - pa(eval_aca, fhat))([xi[1:j-1]..., t, xi[j+1:end]...])
+            else
+                g = t -> (f - pa(eval_aca, fhat))([xi[1:j-1]..., t, xi[j+1:end]...]) / error
+            end
+            fhat[i, j, :] = transform(
+                Chebyshev(),
+                g.(points(Chebyshev(), nbr_interpolation_points))
+                )
+        end
+    end
 
-        fhat_(x) = deepcopy(fhat(x) + prod([a(t) for (a, t) in zip(factors, x)]) * error^(1 - m))
+    return pa(eval_aca, fhat)
+end#=}}}=#
+
+# An ACA implementation that uses a variable number of interpolation points
+function aca_scalar__(#={{{=#
+    f::Function;# R^m -> R
+    nbr_terms::Int64=nbr_terms
+    )::Function# R^m -> R
+    
+    # Initialize
+    fhat::Function = x -> 0.0
+    error::Float64 = Inf
+
+    # Define a domain
+    lower::Float64 = -1.0
+    upper::Float64 = 1.0
+
+    # while abs(error) > tol
+    for i = 1:nbr_terms
+
+        # Estimate argmax of abs ∘ f
+        xi::Vector{Float64} = rand(m)
+        ei::Vector{Function} = Vector{Function}(undef, m)
+        for j in 1:nbr_loops*m
+            j_ = (j - 1)%m + 1
+
+            # Approximate a fiber of f - fhat with a chebfun
+            ei[j_] = Fun( t -> (f - fhat)([xi[1:j_-1]..., t, xi[j_+1:end]...]) )
+            xi[j_] = argmax(ei[j_]^2) # argmax is efficient for chebfuns
+        end
+
+        error = (f - fhat)(xi)
+        println(abs(error))
+
+        # fhat = fhat + ⊗_j eij
+        fhat_(x) = deepcopy(fhat(x) + prod([eij(t) for (eij, t) in zip(ei, x)]) * error^(1 - m))
         fhat = deepcopy(fhat_)
-        k = k + 1
     end
 
     return fhat
 end#=}}}=#
 
 function aca(#={{{=#
-    f;# R^m -> R^n
+    f::Function;# R^m -> R^n
     tol = 1e-2::Float64
-    )# R^m -> R^n
+    )::Function# R^m -> R^n
     
     # TODO
 end#=}}}=#
