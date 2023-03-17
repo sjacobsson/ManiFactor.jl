@@ -5,14 +5,12 @@ using ApproxFun
 
 Aca=Array{Float64, 3}
 
-nbr_terms = 20
+nbr_terms = 200
 nbr_interpolation_points = 100
 nbr_loops = 5
 
 
 # Evaluate an acapproximation
-# t = Array{Float64, 2}(undef, size(a)[2:3])
-# b = Array{Float64, 2}(undef, size(a)[1:2])
 function eval_aca(#={{{=#
     a::Aca,
     x::Vector{Float64};
@@ -40,6 +38,7 @@ function eval_aca(#={{{=#
 
     return sum(mapslices(prod, b, dims=[2]))
 end#=}}}=#
+
 
 # A normal ACA implementation
 function aca_scalar(#={{{=#
@@ -177,6 +176,22 @@ function aca_scalar__(#={{{=#
     end
 
     return fhat
+end#=}}}=#
+
+# A recursive ACA implementation
+function aca_scalar___(#={{{=#
+    f::Function;# R^m -> R
+    nbr_terms::Int64=nbr_terms,
+    nbr_interpolation_points::Int64=nbr_interpolation_points;
+    order=m
+    )::Function# R^m -> R
+    
+    if m = 2
+        return aca_scalar(f, nbr_terms, nbr_interpolation_points)
+    else if m > 2
+        # TODO
+    end
+
 end#=}}}=#
 
 function aca(#={{{=#
