@@ -4,8 +4,8 @@ import LinearAlgebra:
 # Just some quality of life functions
 #
 # Partial application
-function pa(f,a...)#={{{=#
-  (b...) -> f(a...,b...)
+function pa(f, a...; pos=1)#={{{=#
+    return (b...) -> f([b...][1:(pos - 1)]..., a..., [b...][(pos + length([a...]) - 1):end]...)
 end#=}}}=#
 
  # Normalize a vector in the tangent space

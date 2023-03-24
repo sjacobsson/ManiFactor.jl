@@ -7,70 +7,18 @@ using#={{{=#
 
 include("QOL.jl")
 include("Segre.jl")
-include("Aca.jl")
+include("ApproximateFunctionsBetweenLinearSpaces.jl")
 
+include("Example1.jl")
 
 #################### Setup ####################
-
-function stereographic_projection(#={{{=#
-    xs::Vector{Float64};
-    pole::Int64=1
-    )::Vector{Float64}
-
-    n = length(xs)
-    @assert(pole <= n + 1)
-    ys = zeros(n + 1) # Initialize
-
-    for i in 1:(n + 1)
-        if i < pole
-            ys[i] = (2 * xs[i]) / (1 + norm(xs)^2)
-        elseif i == pole
-            ys[i] = (-1 + norm(xs)^2) / (1 + norm(xs)^2)
-        elseif i > pole
-            ys[i] = (2 * xs[i - 1]) / (1 + norm(xs)^2)
-        end
-    end
-    
-    return ys
-end#=}}}=#
-
-function inverse_stereographic_projection(#={{{=#
-    ys::Vector{Float64};
-    pole::Int64=1
-    )::Vector{Float64}
-
-    n = length(ys) - 1
-    @assert(pole <= n + 1)
-    xs = zeros(n) # Initialize
-
-    for i in 1:n
-        xs[i] = ys[i] / ys[n + 1]
-    end
-    
-    return xs
-end#=}}}=#
 
 using Random
 Random.seed!(666)
 
-# f : [-1, 1]^k -> M^n is the function we wish to approximate
+# f : [-1, 1]^m -> M^n is the function we wish to approximate
 
-# k = 2
-# n = 3
-# M = Sphere(n)
-# A = rand(n, k)
-# f(x) = stereographic_projection(A * x)
 
-m = 4
-M = OrthogonalMatrices(m)
-n = manifold_dimension(M)
-function f(x::Vector{Float64})
-    # Assert that the entries of x fit in a square matrix
-    l = Int64(sqrt(length(x)))
-    @assert(length(x) == l^2)
-    Q, _ = qr(reshape(x, l, l))
-    return Q
-end
 
 # k = 4
 # # n = Int64(k^2 + (k + 1) * k / 2)
@@ -91,43 +39,28 @@ end
 
 # println(check_point(M, (Q))
 
-#################### Approximate f ####################
-
-function cheb2(#={{{=#
-    g::Function,# R^2 -> R^n
-    )::Function# R^2 -> R^n
-
-    grid_length = 10
-    fdomain = TensorSpace(repeat([Chebyshev()], k)...)
-    grid = Vector{Vector{Float64}}(points(fdomain, grid_length^k))
-
-    gs = g.(grid)
-
-    # Compute c_ij in f(x, y) = c_ij T_i(x) T_j(y)
-    cs = [transform(fdomain, [y[i] for y in gs]) for i in 1:n]
-
-    return v -> [Fun(fdomain, c)(v) for c in cs]
-end#=}}}=#
+################ Define approximation scheme ###############
 
 function approximate(#={{{=#
     M::AbstractManifold,
-    f::Function; # :: R^m -> M^n
-    approximate_linear=aca::Function # :: (R^m -> R^n) -> (R^m -> R^n)
+    f::Function, # :: [-1, 1]^m -> M^n
+    m::Int64;
+    base_approximate=approximate1::Function # :: ([-1, 1]^m -> R^n) -> ([-1, 1]^m -> R^n)
     # TODO: chart
-    )::Function # :: R^m -> M^n
+    )::Function # :: [-1, 1]^m -> M^n
 
-    # Evaluate f on a point cloud in [-1, 1]^k
-    xs = [2.0 * rand(k) .- 1.0 for _ in 1:100]
+    # Evaluate f on a point cloud in [-1, 1]^m
+    xs = [2.0 * rand(m) .- 1.0 for _ in 1:100]
     fs = f.(xs)
     
     # Choose a point on M and linearize from there
     p = mean(M, fs)
     B = DefaultOrthonormalBasis()
-    chart = (X -> get_coordinates(M, p, X, B)) ∘ (q -> log(M, p, q)) # log : M -> T_p M, get_coordinates : T_p M -> R^n
-    chart_inv = (X -> exp(M, p, X)) ∘ (X -> get_vector(M, p, X, B)) # get_vector : R^n -> T_p M, exp : T_p M -> M^n
+    chart = (X -> get_coordinates(M, p, X, B)) ∘ (q -> log(M, p, q)) # log :: M -> T_p M, get_coordinates : T_p M -> R^n
+    chart_inv = (X -> exp(M, p, X)) ∘ (X -> get_vector(M, p, X, B)) # get_vector :: R^n -> T_p M, exp : T_p M -> M^n
 
     g = chart ∘ f
-    ghat = approximate_linear(g)
+    ghat = base_approximate(g, m)
     fhat = chart_inv ∘ ghat
     return fhat
 end#=}}}=#
@@ -215,12 +148,12 @@ end#=}}}=#
 
 using Printf
 function main()#={{{=#
-    fhat = approximate(M, f)
+    fhat = approximate(M, f, m)
 
     nbr_samples = 100
     ds = zeros(nbr_samples)::Vector{Float64}
     for i in 1:nbr_samples
-        x = ones(k) - 2.0 * rand(k)
+        x = ones(m) - 2.0 * rand(m)
         ds[i] = distance(M, f(x), fhat(x))
     end
     rms_error = sqrt(sum(ds.^2 / nbr_samples))
