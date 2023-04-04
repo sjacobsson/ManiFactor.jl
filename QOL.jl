@@ -8,16 +8,6 @@ function pa(f, a...; pos=1)#={{{=#
     return (b...) -> f([b...][1:(pos - 1)]..., a..., [b...][(pos + length([a...]) - 1):end]...)
 end#=}}}=#
 
- # Normalize a vector in the tangent space
-function normalize(#={{{=#
-    M::AbstractManifold,
-    p,
-    v
-    ) where {valence, F}
-
-    return v / norm(M, p, v)
-end#=}}}=#
-
 # Approximate derivative of f at x
 function finite_difference(#={{{=#
     f::Function, # :: ℝ -> some vector space

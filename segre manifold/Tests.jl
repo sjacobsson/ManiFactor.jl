@@ -1,3 +1,5 @@
+include("Segre.jl")
+
 # Testing that exp maps into the manifold.
 function test_exp(#={{{=#
     M::AbstractManifold;

@@ -85,6 +85,16 @@ function dot(#={{{=#
 
 end#=}}}=#
 
+# Normalize a vector in the tangent space
+function normalize(#={{{=#
+    M::AbstractManifold,
+    p,
+    v
+    ) where {valence, F}
+
+    return v / norm(M, p, v)
+end#=}}}=#
+
 function norm(#={{{=#
     M::Segre{valence, F},
     p::Vector{Vector{Float64}},
