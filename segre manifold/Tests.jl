@@ -1,6 +1,6 @@
 include("Segre.jl")
 
-# Testing that exp maps into the manifold.
+""" Testing that exp maps into the manifold. """
 function test_exp(#={{{=#
     M::AbstractManifold;
     verbose=false
@@ -20,7 +20,7 @@ function test_exp(#={{{=#
     if !isnothing(e); throw(e); end
 end#=}}}=#
 
-# Testing that geodesics are unit speed
+""" Testing that geodesics are unit speed """
 function test_geodesic_speed(#={{{=#
     M::AbstractManifold;
     verbose=false
@@ -42,7 +42,7 @@ function test_geodesic_speed(#={{{=#
     @assert(isapprox(geodesic_speed, 1.0))
 end#=}}}=#
 
-# Testing that geodesics only have normal curvature
+""" Testing that geodesics only have normal curvature """
 function test_geodesic_curvature(#={{{=#
     M::AbstractManifold;
     verbose=false
@@ -60,7 +60,7 @@ function test_geodesic_curvature(#={{{=#
     @assert(isapprox(dot(n, v_), 0.0, atol=1e-6))
 end#=}}}=#
 
-# Test that log is left and right inverse of exp
+""" Test that log is left and right inverse of exp """
 function test_log(#={{{=#
     M::AbstractManifold;
     verbose=false

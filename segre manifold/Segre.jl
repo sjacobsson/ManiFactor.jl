@@ -12,7 +12,7 @@ using
     Manifolds
 #=}}}=#
 
-# Seg(P^n1 x ... P^nd) ~ R^+ x S^(n1 - 1) x ... x S^(nd - 1)
+""" Seg(P^n1 x ... P^nd) ~ R^+ x S^(n1 - 1) x ... x S^(nd - 1) """
 struct
     Segre{V, 𝔽} <: AbstractManifold{𝔽}
 end
@@ -85,7 +85,7 @@ function dot(#={{{=#
 
 end#=}}}=#
 
-# Normalize a vector in the tangent space
+""" Normalize a vector in the tangent space """
 function normalize(#={{{=#
     M::AbstractManifold,
     p,
@@ -123,7 +123,7 @@ function rand(#={{{=#
     end
 end#=}}}=#
 
-# Embed p ∈ Segre((n1, ..., nd), F) in F^{n1 x ... x nd}
+""" Embed p ∈ Segre((n1, ..., nd), F) in F^{n1 x ... x nd} """
 function embed(#={{{=#
     M::Segre{valence, F},
     p::Vector{Vector{Float64}}

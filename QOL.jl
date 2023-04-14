@@ -2,13 +2,13 @@ import LinearAlgebra:
     normalize
 
 # Just some quality of life functions
-#
-# Partial application
+
+""" Partial application """
 function pa(f, a...; pos=1)#={{{=#
     return (b...) -> f([b...][1:(pos - 1)]..., a..., [b...][(pos + length([a...]) - 1):end]...)
 end#=}}}=#
 
-# Approximate derivative of f at x
+""" Approximate derivative of f at x """
 function finite_difference(#={{{=#
     f::Function, # :: ℝ -> some vector space
     x::Float64,
