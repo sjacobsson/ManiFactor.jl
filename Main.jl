@@ -6,8 +6,8 @@ using#={{{=#
     Plots#=}}}=#
 
 include("QOL.jl")
-include("Segre.jl")
-include("ApproximateFunctionsBetweenLinearSpaces.jl")
+include("segre manifold/Segre.jl")
+include("vector-valued approximations/Approximations.jl")
 
 include("Example1.jl")
 
@@ -67,8 +67,8 @@ end#=}}}=#
 
 
 #################### Plot approximation ####################
-ENV["MPLBACKEND"] = "TkAgg" ;# Solves "Warning: No working GUI backend found for matplotlib"
-pyplot()
+# ENV["MPLBACKEND"] = "TkAgg" ;# Solves "Warning: No working GUI backend found for matplotlib"
+# pyplot()
 
 function plot_(_::Sphere{2, ℝ}, kwargs...)#={{{=#
 	n = 50

@@ -3,9 +3,11 @@ include("Approximations.jl")
 using Combinatorics, Transducers
 using LinearAlgebra
 
-### Example functions [-1, 1]^d -> R from Chertkov, Ryzhakov, and Oseledets' 2022 paper https://arxiv.org/pdf/2208.03380.pdf
+### Example functions [-1, 1]^d -> R ### #={{{=#
+# Compiled in https://arxiv.org/pdf/1308.4008.pdf
+# Used in, for example, https://arxiv.org/pdf/2208.03380.pdf, https://arxiv.org/pdf/2211.11338.pdf
 
-function fackley(xs_::AbstractVector)::AbstractFloat#={{{=#
+function ackley(xs_::AbstractVector)::AbstractFloat#={{{=#
     d = length(xs_)
     xs = xs_ * 32.768 # rescale so that x \in [-1, 1]^d
 
@@ -20,38 +22,38 @@ function fackley(xs_::AbstractVector)::AbstractFloat#={{{=#
         )
 end#=}}}=#
 
-function falpine(xs_::AbstractVector)::AbstractFloat#={{{=#
+function alpine(xs_::AbstractVector)::AbstractFloat#={{{=#
     d = length(xs_)
-    xs = xs_ * 10.0 # rescale so that x \in [-1, 1]^d
+    xs = xs_ * 10.0
 
     return sum([abs(x * sin(x) + 0.1 * x) for x in xs])
 end#=}}}=#
 
-function fdixon(xs_::AbstractVector)::AbstractFloat#={{{=#
+function dixon(xs_::AbstractVector)::AbstractFloat#={{{=#
     d = length(xs_)
-    xs = xs_ * 10.0 # rescale so that x \in [-1, 1]^d
+    xs = xs_ * 10.0
 
-    return (x[1] - 1)^2 + sum([i * (2 * x[i]^2 - x[i - 1])^2 for i in 2:d])
+    return (xs[1] - 1)^2 + sum([i * (2 * xs[i]^2 - xs[i - 1])^2 for i in 2:d])
 end#=}}}=#
 
-function fexponential(xs::AbstractVector)::AbstractFloat#={{{=#
+function exponential(xs::AbstractVector)::AbstractFloat#={{{=#
     d = length(xs)
 
     return -exp(-(1 / 2.0) * sum([x^2 for x in xs]))
 end#=}}}=#
 
-function fgrienwank(xs_::AbstractVector)::AbstractFloat#={{{=#
+function grienwank(xs_::AbstractVector)::AbstractFloat#={{{=#
     d = length(xs_)
     xs = xs_ * 600.0
 
     return (
         sum([x^2 / 4000.0 for x in xs])
-        - prod([cos(x[i] / sqrt(i)) for i in 1:d])
+        - prod([cos(xs[i] / sqrt(i)) for i in 1:d])
         + 1
         )
 end#=}}}=#
 
-function fmichalewicz(xs_::AbstractVector)::AbstractFloat#={{{=#
+function michalewicz(xs_::AbstractVector)::AbstractFloat#={{{=#
     d = length(xs_)
     xs = (xs_ .+ 1) * pi / 2
 
@@ -60,9 +62,9 @@ function fmichalewicz(xs_::AbstractVector)::AbstractFloat#={{{=#
     return -sum([sin(xs[i]) * sin(i * xs[i]^2 / pi)^(2 * m) for i in 1:d])
 end#=}}}=#
 
-function fpiston(xs::AbstractVector)::AbstractFloat#={{{=#
+function piston(xs::AbstractVector)::AbstractFloat#={{{=#
     d = length(xs)
-    assert(d == 7)
+    @assert(d == 7)
     M   = (60.0 - 30.0) * xs[1] / 2     + (60.0 + 30.0) / 2
     S   = (0.020 - 0.005) * xs[2] / 2   + (0.020 + 0.005) / 2
     V0  = (0.010 - 0.005) * xs[3] / 2   + (0.010 + 0.005) / 2
@@ -71,145 +73,106 @@ function fpiston(xs::AbstractVector)::AbstractFloat#={{{=#
     Ta  = (296.0 - 290.0) * xs[6] / 2   + (296.0 + 290.0) / 2
     T0  = (360.0 - 340.0) * xs[7] / 2   + (360.0 + 340.0) / 2
 
-    m = 10
+    A = P0 * S + 19.62 * M - k * V0 / S
+    V = S * (sqrt(A^2 + 4 * k * P0 * V0 * Ta / T0) - A) / (2 * k)
 
-    # return TODO
+    return 2 * pi * sqrt(M / (k + S^2 * P0 * V0 * Ta / (T0 * V^2)))
 end#=}}}=#
 
+function qing(xs_::AbstractVector)::AbstractFloat#={{{=#
+    d = length(xs_)
+    xs = (xs_ .+ 1.0) * 250.0
 
-
-
-
-# TODO: Use above defined functions
-# TODO: Compute required rank and number of interpolation points
-
-""" Basis for space of degree d polynomials of m variables.  """
-function polynomial_basis(m, d; with_bias=true)#={{{=#
-    _m = with_bias ? m+1 : m
-    exponents = multiexponents(_m, d)
-    return function (x)
-        _x = with_bias ? vcat(x, one(eltype(x))) : x
-        exponents |> Map(exponent -> prod(_x.^exponent)) |> collect
-    end
+    return sum([(xs[i]^2 - i)^2 for i in 1:d])
 end#=}}}=#
 
-""" Testing that approximate_scalar1 is a good fit """
-function test_approximate_scalar1(#={{{=#
+function rastrigin(xs_::AbstractVector)::AbstractFloat#={{{=#
+    d = length(xs_)
+    xs = xs_ * 5.12
+
+    A = 10.0
+
+    return A * d + sum([xs[i]^2 - A * cos(2 * pi * xs[i]) for i in 1:d])
+end#=}}}=#
+
+function rosenbrock(xs_::AbstractVector)::AbstractFloat#={{{=#
+    d = length(xs_)
+    xs = xs_ * 2.048
+
+    return sum([(100 * (xs[i + 1] - xs[i]^2)^2 + (1.0 - xs[i])^2) for i in 1:(d - 1)])
+end#=}}}=#
+
+function schaffer(xs_::AbstractVector)::AbstractFloat#={{{=#
+    d = length(xs_)
+    xs = xs_ * 100.0
+
+    return sum([
+        0.5 + (sin(sqrt(xs[i]^2 + xs[i + 1]^2))^2 - 0.5) / (1.0 + 0.001 * (xs[i] + xs[i + 1]^2))^2
+        for i in 1:(d - 1)])
+end#=}}}=#
+
+function schwefel(xs_::AbstractVector)::AbstractFloat#={{{=#
+    d = length(xs_)
+    xs = xs_ * 500.0
+
+    return 428.9829 * d - sum([x * sin(sqrt(abs(x))) for x in xs])
+end#=}}}=#
+
+gs = [
+    ackley,
+    alpine,
+    dixon,
+    exponential,
+    grienwank, # TODO: nw \mapsto w
+    michalewicz,
+    # piston,
+    qing,
+    rastrigin,
+    rosenbrock,
+    schaffer,
+    schwefel
+    ]
+#=}}}=#
+
+# TODO: test approximate_scalar(..., complete_sampling=true) against predicted error bounds
+
+""" Testing that approximate_scalar is a good fit """
+function test_approximate_scalar(#={{{=#
     ;verbose=false,
     kwargs...
     )
 
-    d = 7
-    nbr_loops = 3
-    for m in 1:4
+    # TODO: when m = 1, do a normal chebfun
+    for m in 2:5
         if verbose
             println()
             println("m = ", m)
         end
-        for _ in 1:nbr_loops
-            cs = rand(binomial(m + d, d))
+        for g in gs
 
-            # Let g be a random d:th degree polynomial
-            function g(x::Vector{Float64})::Float64
-                return dot(cs, polynomial_basis(m, d)(x))
-            end
-            ghat = approximate_scalar1(g, m; kwargs...)
+            ghat = approximate_scalar(g, m; kwargs...)
     
-            x = rand(m)
-            g_ = g(x)
-            ghat_ = ghat(x)
-            error = abs(g_ - ghat_)
-
-            if (error / abs(g_) > 1e-10);
-                throw("approximate_scalar1 not accurate enough");
-            end
-            if verbose
-                println("g(x)  = ", round(g_; sigdigits=2))
-                println("e_rel = ", round(error / abs(g_); sigdigits=2))
-                println()
-            end
-        end
-    end
-end#=}}}=#
-
-""" Testing that approximate1 is a good fit """
-function test_approximate1(#={{{=#
-    ;verbose=false,
-    kwargs...
-    )
-
-    d = 7
-    nbr_loops = 1
-    for m in 1:4
-        if verbose
-            println()
-            println("m = ", m)
-        end
-        for n in 1:5
-            for _ in 1:nbr_loops
-                cs = [rand(binomial(m + d, d)) for _ in 1:n]
-    
-                # Let g be a random d:th degree polynomial
-                function g(x::Vector{Float64})::Vector{Float64}
-                    return [dot(cs[i], polynomial_basis(m, d)(x)) for i in 1:n]
-                end
-                ghat = approximate1(g, m, n; kwargs...)
-        
+            max_error = 0.0
+            x_max = zeros(m)
+            for _ in 1:10
                 x = rand(m)
-                g_ = g(x)
-                ghat_ = ghat(x)
-                error = norm(g_ - ghat_)
-    
-                if (error / norm(g_) > 1e-10);
-                    throw("approximate1 not accurate enough");
-                end
-                if verbose
-                    println("g(x)  = ", [round(gi; sigdigits=2) for gi in g_])
-                    println("e_rel = ", round(error / norm(g_), sigdigits=2))
-                    println()
+                g_x = g(x)
+                ghat_x = ghat(x)
+                error = abs(g_x - ghat_x)
+                if error > max_error
+                    x_max = x
+                    max_error = error
                 end
             end
-        end
-    end
-end#=}}}=#
 
-""" Testing that approximate_scalar3 is a good fit """
-function test_approximate_scalar1(#={{{=#
-    ;verbose=false,
-    kwargs...
-    )
-
-    d = 7
-    nbr_loops = 3
-    for m in 1:4
-        if verbose
-            println()
-            println("m = ", m)
-        end
-        for _ in 1:nbr_loops
-            cs = rand(binomial(m + d, d))
-
-            # Let g be a random d:th degree polynomial
-            function g(x::Vector{Float64})::Float64
-                return dot(cs, polynomial_basis(m, d)(x))
-            end
-            ghat = approximate_scalar1(g, m; kwargs...)
-    
-            x = rand(m)
-            g_ = g(x)
-            ghat_ = ghat(x)
-            error = abs(g_ - ghat_)
-
-            if (error / abs(g_) > 1e-10);
-                throw("approximate_scalar1 not accurate enough");
-            end
+            # if (error / abs(g_x) > 1e-10);
+            #     throw("approximate_scalar1 not accurate enough");
+            # end
             if verbose
-                println("g(x)  = ", round(g_; sigdigits=2))
-                println("e_rel = ", round(error / abs(g_); sigdigits=2))
-                println()
+                println(rpad(g, 12, " "), " has relative error ", round(max_error / abs(g(x_max)); sigdigits=2))
             end
         end
     end
 end#=}}}=#
 
-# TODO: approximate_scalar2 and approximate2
+# TODO:  test_approximate_vector
