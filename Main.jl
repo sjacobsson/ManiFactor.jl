@@ -7,7 +7,7 @@ using#={{{=#
 
 include("QOL.jl")
 include("segre manifold/Segre.jl")
-include("vector-valued approximations/Approximations.jl")
+include("../vector-valued approximations/Approximations.jl")
 
 include("Example1.jl")
 
