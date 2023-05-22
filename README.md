@@ -13,8 +13,6 @@ For example, it tests that `exp(::Segre, ...)` really maps vectors in the tangen
 
 
 ## TODO
-Optimize the ACA.
-
 implement `to_tucker`.
 
 Go through all of the code and replace the `@assert`s with something else as assert may be turned off as an optimization.
