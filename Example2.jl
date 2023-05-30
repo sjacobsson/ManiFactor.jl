@@ -10,7 +10,7 @@ Random.seed!(420)
 a = LinearAlgebra.normalize(rand(m1))
 b = LinearAlgebra.normalize(rand(m2))
 
-function f(x::AbstractVector{Real})::SegrePoint
+function f(x)
     U, S, Vt = svd(0.01 * reshape(x, m1, m2) + a * b')
     return [[S[1]], U[1, :], Vt[:, 1]]
 end
