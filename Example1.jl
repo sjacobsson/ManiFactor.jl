@@ -21,9 +21,9 @@ function stereographic_projection(#={{{=#
 end#=}}}=#
 
 function inverse_stereographic_projection(#={{{=#
-    ys::Vector{Float64};
+    ys::AbstractVector{Real};
     pole::Int64=1
-    )::Vector{Float64}
+    )::AbstractVector{Real}
 
     n = length(ys) - 1
     @assert(pole <= n + 1)
@@ -36,9 +36,9 @@ function inverse_stereographic_projection(#={{{=#
     return xs
 end#=}}}=#
 
-n = 2
+n = 10
 M = Sphere(n)
-m = 3
+m = 5
 A = rand(n, m)
 f(x) = stereographic_projection(A * x)
 

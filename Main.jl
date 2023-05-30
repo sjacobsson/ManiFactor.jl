@@ -7,46 +7,39 @@ using#={{{=#
 
 include("QOL.jl")
 include("segre manifold/Segre.jl")
-include("../vector-valued approximations/Approximations.jl")
+include("../vector-valued approximations/Approximations.jl") # TODO: Make Approximations into a package
 
-include("Example1.jl")
 
 #################### Setup ####################
 
 using Random
-Random.seed!(666)
-
-# f : [-1, 1]^m -> M^n is the function we wish to approximate
-
-
-
-# k = 4
-# # n = Int64(k^2 + (k + 1) * k / 2)
-# M = ProductManifold(
-#     OrthogonalMatrices(k),
-#     Euclidean(Int64((k + 1) * k / 2))
-#     )
-# n = manifold_dimension(M)
-# # TODO: Write better check_point(M::Euclidean, p)?
-# function f(x::Vector{Float64})
-#     # Assert that the entries of x fit in a square matrix
-#     l = Int64(sqrt(length(x)))
-#     @assert(length(x) == l^2)
-#     Q, R = qr(reshape(x, l, l))
-#     vec_R = [R[i, j] for i in 1:l for j in 1:l if i <= j] # Flatten upper triangular part of R
-#     return ProductRepr(Q, vec_R)
-# end
-
-# println(check_point(M, (Q))
+Random.seed!(420)
+# include("Example1.jl")
+# include("Example2.jl")
+include("Example3.jl")
 
 ################ Define approximation scheme ###############
 
+"""
+    function approximate(
+        M::AbstractManifold,
+        m::Int64,
+        n::Int64,
+        f::Function; # :: [-1, 1]^m -> M^n
+        base_approximate=approximate_vector::Function, # :: (m::Int) -> (n::Int) -> ([-1, 1]^m -> R^n) -> ([-1, 1]^m -> R^n)
+        kwargs...
+        )::Function # :: [-1, 1]^m -> M^n
+
+Approximate a manifold-valued function using Riemann normal coordinate chart.
+"""
 function approximate(#={{{=#
     M::AbstractManifold,
-    f::Function, # :: [-1, 1]^m -> M^n
-    m::Int64;
-    base_approximate=approximate1::Function # :: ([-1, 1]^m -> R^n) -> ([-1, 1]^m -> R^n)
-    # TODO: chart
+    m::Int,
+    n::Int,
+    f::Function; # :: [-1, 1]^m -> M^n
+    base_approximate=approximate_vector::Function, # :: (m::Int) -> (n::Int) -> ([-1, 1]^m -> R^n) -> ([-1, 1]^m -> R^n)
+    # TODO: chart?
+    kwargs...
     )::Function # :: [-1, 1]^m -> M^n
 
     # Evaluate f on a point cloud in [-1, 1]^m
@@ -60,7 +53,7 @@ function approximate(#={{{=#
     chart_inv = (X -> exp(M, p, X)) ∘ (X -> get_vector(M, p, X, B)) # get_vector :: R^n -> T_p M, exp : T_p M -> M^n
 
     g = chart ∘ f
-    ghat = base_approximate(g, m)
+    ghat = base_approximate(m, n, g; kwargs...)
     fhat = chart_inv ∘ ghat
     return fhat
 end#=}}}=#
@@ -147,20 +140,27 @@ function plot_image_of_unit_grid(#={{{=#
 end#=}}}=#
 
 using Printf
-function main()#={{{=#
-    fhat = approximate(M, f, m)
+function main(;kwargs...)#={{{=#
+    fhat = approximate(M, m, n, f; kwargs...)
 
     nbr_samples = 100
-    ds = zeros(nbr_samples)::Vector{Float64}
+    ds = zeros(nbr_samples)
     for i in 1:nbr_samples
         x = ones(m) - 2.0 * rand(m)
         ds[i] = distance(M, f(x), fhat(x))
     end
-    rms_error = sqrt(sum(ds.^2 / nbr_samples))
+    error = maximum(ds)
     
-    print("rms error: ")
-    @printf("%.1E", rms_error)
+    print("max error: ")
+    @printf("%.1E", error)
     print("\n")
+
+    x = ones(m) - 2.0 * rand(m)
+
+    print("evaluating f takes   ")
+    @time(f(x))
+    print("evaluating fhat takes")
+    @time(fhat(x))
     
     # plot_(M)
     # plot_image_of_unit_grid(M, f;
@@ -168,4 +168,6 @@ function main()#={{{=#
     # plot_image_of_unit_grid(M, fhat;
     #     color="magenta", label="f_hat", linestyle=:dot)
     # plot!([], label=false) # BODGE
+    
+    return 0
 end#=}}}=#

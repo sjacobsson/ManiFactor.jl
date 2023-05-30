@@ -1,13 +1,18 @@
-using LinearAlgebra: qr
+using LinearAlgebra
 
-k = 2
-M = OrthogonalMatrices(k)
-m = k^2
-n = manifold_dimension(M)
-function f(x::Vector{Float64})
-    # Assert that the entries of x fit in a square matrix
-    l = Int64(sqrt(length(x)))
-    @assert(length(x) == l^2)
-    Q, _ = qr(reshape(x, l, l))
-    return Q
+m1 = 2
+m2 = 3
+n = 1 + (m1 - 1) + (m2 - 1)
+m = m1 * m2
+M = Segre((m1, m2))
+
+Random.seed!(420)
+a = LinearAlgebra.normalize(rand(m1))
+b = LinearAlgebra.normalize(rand(m2))
+
+function f(x::AbstractVector{Real})::SegrePoint
+    U, S, Vt = svd(0.01 * reshape(x, m1, m2) + a * b')
+    return [[S[1]], U[1, :], Vt[:, 1]]
 end
+
+
