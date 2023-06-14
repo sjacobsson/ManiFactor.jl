@@ -26,12 +26,21 @@ function finite_difference(#={{{=#
             ) / h
     elseif order == 2
     return (
-        (-1 / 12) *  f(x - 2 * h) +
-        (4 / 3) *  f(x - 1 * h) +
-        (-5 / 2) *   f(x) +
-        (4 / 3) *  f(x + 1 * h) +
+        (-1 / 12) * f(x - 2 * h) +
+        (4 / 3) *   f(x - 1 * h) +
+        (-5 / 2) *  f(x) +
+        (4 / 3) *   f(x + 1 * h) +
         (-1 / 12) * f(x + 2 * h)
-        ) / h
+        ) / h^2
+    elseif order == 3
+    return (
+        (1 / 8) *   f(x - 3 * h) +
+        (-1) *      f(x - 2 * h) +
+        (13 / 8) *  f(x - 1 * h) +
+        (-13 / 8) * f(x + 1 * h) +
+        (1) *       f(x + 2 * h) +
+        (-1 / 8) *  f(x + 3 * h)
+        ) / h^3
     end
 end#=}}}=#
 

@@ -74,7 +74,7 @@ set using the `kwargs...`.
 """
 function check_point(#={{{=#
     M::Segre{valence, 𝔽},
-    p,
+    p;
     kwargs...
     ) where {valence, 𝔽}
 
