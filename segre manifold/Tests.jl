@@ -1,4 +1,5 @@
 include("Segre.jl")
+using StatsBase: sample
 
 """ Testing that exp maps into the manifold. """
 function test_exp(#={{{=#
@@ -101,6 +102,44 @@ function test_get_coordinates(#={{{=#
     B = DefaultOrthonormalBasis()
     @assert(isapprox(v, get_vector(M, p, get_coordinates(M, p, v, B), B)))
     @assert(isapprox(X, get_coordinates(M, p, get_vector(M, p, X, B), B)))
+end#=}}}=#
+
+""" Test sectional curvature. """
+function test_curvature(#={{{=#
+    M::AbstractSegre;
+    verbose=false
+    )
+    
+    p = rand(M)
+    if verbose; println("p = ", p); end
+
+    V = valence(M)
+    (i, j) = sample(1:length(V), 2; replace=false)
+
+    v1 = [[0.0], zeros.(V)...]
+    v1[i + 1] = rand(Sphere(V[i] - 1), vector_at=p[i + 1])
+    v1 = normalize(M, p, v1)
+
+    v2 = [[0.0], zeros.(V)...]
+    v2[j + 1] = rand(Sphere(V[j] - 1), vector_at=p[j + 1])
+    v2 = normalize(M, p, v2)
+    if verbose; println("v1 = ", v1); end
+    if verbose; println("v2 = ", v2); end
+
+    e = check_vector(M, p, v1)
+    if !isnothing(e); throw(e); end
+    e = check_vector(M, p, v2)
+    if !isnothing(e); throw(e); end
+
+    r = 1e-2
+    ps = [exp(M, p, r * (cos(theta) * v1 + sin(theta) * v2)) for theta in 0:1e-3:(2 * pi)]
+    ps_ = [ps[2:end]..., ps[1]]
+    ds = [distance(M, p1, p2) for (p1, p2) in zip(ps, ps_)]
+    C = sum(ds)
+    K = 3 * (2 * pi * r - C) / (pi * r^3)
+    if verbose; println("K = ", K); end
+
+    @assert(isapprox(K, -1.0 / p[1][1]^2, rtol=1e-1))
 end#=}}}=#
 
 function main(;#={{{=#

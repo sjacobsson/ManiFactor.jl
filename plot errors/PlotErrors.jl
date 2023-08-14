@@ -231,7 +231,8 @@ function closest_rank_one_matrix(;#={{{=#
         ))
         #=}}}=#
 
-    V(nu) = maximum([[V1, V2, V3, V3, V4, V5, V6, V7, V8, V9, V10, V11, repeat([t -> NaN], 100)...][nu](l) for l in 1:m])
+    # V(nu) = maximum([[V1, V2, V3, V3, V4, V5, V6, V7, V8, V9, V10, V11, repeat([t -> NaN], 100)...][nu](l) for l in 1:m])
+    V(nu) = NaN # TODO
 
     # epsilon is the error bound on the tangent space for tensorized Chebyshev interpolation
     # b is the error bound on the manifold

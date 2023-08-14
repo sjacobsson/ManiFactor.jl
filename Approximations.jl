@@ -7,7 +7,7 @@ using#={{{=#
 
 include("QOL.jl")
 include("segre manifold/Segre.jl")
-include("../vector-valued approximations/Approximations.jl") # TODO: Make Approximations into a package
+include("../approximating vector-valued maps/Approximations.jl") # TODO: Make Approximations into a package
 
 
 """
