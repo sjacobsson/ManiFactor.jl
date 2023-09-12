@@ -219,7 +219,7 @@ function inner(#={{{=#
     v,
     ) where {valence, 𝔽}
 
-    throw("Not implemented.")
+    return u[1][1] * v[1][1] + p[1][1]^2 * (dot(u[2:end], v[2:end]))
 end#=}}}=#
 
 """
@@ -435,3 +435,42 @@ function distance(# {{{
     # TODO: Write down the closed-form expression for the distance
     return norm(M, p, log(M, p, q))
 end# }}}
+
+# TODO: Check factor of p[1][1]
+function second_fundamental_form(#={{{=#
+    M::Segre{valence, 𝔽},
+    p,
+    u,
+    v
+    ) where {valence, 𝔽}
+
+    h = 0 * embed(M, p) # Initialize
+    for i in 1:length(valence)
+        for j in 1:length(valence)
+            if i != j
+                p_ = 1 * p
+                p_[i + 1] = u[i + 1]
+                p_[j + 1] = v[j + 1]
+                h = h + kron(p_...)[:, 1]
+            end
+        end
+    end
+
+    return h
+end#=}}}=#
+
+# TODO: do this without embedding?
+function sectional_curvature(#={{{=#
+    M::Segre{valence, 𝔽},
+    p,
+    u,
+    v
+    ) where {valence, 𝔽}
+
+    return (
+        dot(second_fundamental_form(M, p, u, u), second_fundamental_form(M, p, v, v)) -
+        dot(second_fundamental_form(M, p, u, v), second_fundamental_form(M, p, u, v))
+        ) / (
+            norm(M, p, u)^2 * norm(M, p, v)^2 - inner(M, p, u, v)^2
+        )
+end#=}}}=#
