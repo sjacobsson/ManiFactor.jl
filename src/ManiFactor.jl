@@ -2,13 +2,14 @@ module ManiFactor
 
 using ManifoldsBase
 using Manifolds
+using ApproximatingMapsBetweenLinearSpaces
 using Kronecker
 using SplitApplyCombine #TODO: is this needed?
-using Plots
-
-include("QOL.jl")
 include("segre/Segre.jl")
-include("../approximating vector-valued maps/Approximations.jl") # TODO: Make Approximations into a package
+# include("../approximating vector-valued maps/Approximations.jl") # TODO: Make Approximations into a package
+
+export
+    approximate
 
 """
     function approximate(

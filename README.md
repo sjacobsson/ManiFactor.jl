@@ -1,20 +1,9 @@
-# manifold-valued approximations
+# Approximating maps into manifolds
 
-`Main.jl` extends the approximation schemes in [`Approximations.jl`](TODO) to approximate functions of the type $$\mathbb{R}^n \to M^n$$ where $M^n$ is an $n$-dimensional manifold.
+Approximate functions of type $$\mathbb{R}^m \to M^n$$ where $M^n$ is an $n$-dimensional Riemannian manifold manifold.
 
-`segre manifold/Segre.jl` implements the Segre manifold of rank 1 tensors as an `AbstractManifold` from the `Manifolds.jl` package.
+Depends on `ApproximatingMapsBetweenLinearSpaces.jl`, which is available at TODO.
 
-`segre manifold/Tests.jl` contains unit tests.
-For example, it tests that `exp(::Segre, ...)` really maps vectors in the tangent space to unit speed curves with zero geodesic curvature.
+## Example 1
 
-`Example1.jl` TODO
-
-`Example2.jl` TODO
-
-`Example3.jl` defines a function $\mathbb{R}^{n} \to \mathbb{R}^{m_1 + m_2}$ that computes the best rank 1 approximation to a pencil of $m_1 \times m_2$ matrices.
-
-`QOL.jl` contains some quality of life functions.
-
-
-## TODO
-implement `to_tucker`.
+Approximate $$f \colon [-1, 1]^2 \to S^2,\\ (x, y) \mathrm{stereographic projection}(x^2 - y^2, 2 x y).$$

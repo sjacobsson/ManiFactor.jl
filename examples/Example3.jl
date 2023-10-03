@@ -1,7 +1,11 @@
-include("../Approximations.jl")
-using Plots; pyplot()
+# Approximate a function f: [-1, 1]^3 -> Seg((k, k))
+using Manifolds
+using ManiFactor
+using ApproximatingMapsBetweenLinearSpaces: chebfun
+using TensorToolbox: hosvd
 using LinearAlgebra
 using Random
+using Plots; pyplot()
 
 m=3
 k=30
@@ -13,8 +17,8 @@ M = Segre((k, k))
 # closest rank 1 approximation to
 #   exp(x1) exp(V x2) diag(2^-1, 2^-2, ...) exp(W x2)
 Random.seed!(420)
-W1 = LinearAlgebra.normalize(rand(k, k)); W1 = (W1 - W1') / 2
-W2 = LinearAlgebra.normalize(rand(k, k)); W2 = (W2 - W2') / 2
+W1 = normalize(rand(k, k)); W1 = (W1 - W1') / 2
+W2 = normalize(rand(k, k)); W2 = (W2 - W2') / 2
 function f(x) # :: [-1, 1]^m -> Segre((k, k))
     return [
         [exp(x[1]) / 2.0],

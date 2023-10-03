@@ -17,7 +17,9 @@ using Manifolds
 using LinearAlgebra
 using Base.Iterators
 using Kronecker
-include("../QOL.jl")
+
+export AbstractSegre
+export Segre
 
 """
     Seg(P^n1 x ... P^nd) ~ R^+ x S^(n1 - 1) x ... x S^(nd - 1)
@@ -40,7 +42,7 @@ ndims(::Segre{V, 𝔽}) where {V, 𝔽} = length(V)
 
 # Overwrite of check_point for the sphere that also checks that the input has
 # the right length.
-function check_point(#={{{=#
+function check_point_(#={{{=#
     M::AbstractSphere,
     p;
     kwargs...
@@ -94,7 +96,7 @@ function check_point(#={{{=#
 
     for (x, n) in zip(p[2:end], valence)
         # check_point does not raise a DomainError, but returns it...
-        e = check_point(Sphere(n - 1)::AbstractSphere{𝔽}, x; kwargs...)
+        e = check_point_(Sphere(n - 1)::AbstractSphere{𝔽}, x; kwargs...)
         if !isnothing(e); return e; end
     end
     
@@ -103,7 +105,7 @@ end#=}}}=#
 
 # Overwrite of check_vector for the sphere that also checks that the input has
 # the right length.
-function check_vector(#={{{=#
+function check_vector_(#={{{=#
     M::AbstractSphere,
     p,
     X;
@@ -150,7 +152,7 @@ function check_vector(#={{{=#
     @assert(size.(v) == size.(p))
     for (x, xdot, n) in zip(p[2:end], v[2:end], valence)
         # check_vector(::AbstractSphere, ...) uses isapprox to compare the dot product to 0, which by default sets atol=0...
-        e = check_vector(Sphere(n - 1)::AbstractSphere{𝔽}, x, xdot; atol=1e-14, kwargs...)
+        e = check_vector_(Sphere(n - 1)::AbstractSphere{𝔽}, x, xdot; atol=1e-14, kwargs...)
         if !isnothing(e); return e; end
     end
     
