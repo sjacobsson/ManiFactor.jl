@@ -8,3 +8,5 @@ Depends on `ApproximatingMapsBetweenLinearSpaces.jl`, which is available at TODO
 
 Approximate
 $$f \colon [-1, 1]^2 \to S^2, (x, y) \mapsto \mathrm{stereographic~projection}(x^2 - y^2, 2 x y).$$
+
+![Plot](examples/Example1.png)
