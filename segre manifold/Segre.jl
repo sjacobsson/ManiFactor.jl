@@ -1,4 +1,4 @@
-import Manifolds:#={{{=#
+import Manifolds:
     check_point,
     check_vector,
     manifold_dimension,
@@ -12,14 +12,12 @@ import Manifolds:#={{{=#
     distance,
     embed,
     rand
-using
-    ManifoldsBase,
-    Manifolds,
-    LinearAlgebra,
-    Base.Iterators,
-    Kronecker
+using ManifoldsBase
+using Manifolds
+using LinearAlgebra
+using Base.Iterators
+using Kronecker
 include("../QOL.jl")
-#=}}}=#
 
 """
     Seg(P^n1 x ... P^nd) ~ R^+ x S^(n1 - 1) x ... x S^(nd - 1)
@@ -130,11 +128,14 @@ function check_vector(#={{{=#
 end#=}}}=#
 
 """
-    check_vector(M::Segre, p, X; kwargs... )
+    function check_vector(
+        M::Segre{valence, 𝔽},
+        p,
+        v,
+        kwargs...
+        )
 
-Check whether `X` is a tangent vector to `p` on `M`, i.e. after
-`check_point`(M,p)`, `X` has to be of same dimension as `p` and orthogonal to
-`p`. The tolerance can be set using the `kwargs...`.
+Check whether `v` is a tangent vector to `p` on `M`, i.e. after `check_point`(M, p)`, `v` has to be of same dimension as `p` and orthogonal to `p`. The tolerance can be set using the `kwargs...`.
 """
 function check_vector(#={{{=#
     M::Segre{valence, 𝔽},
@@ -156,6 +157,11 @@ function check_vector(#={{{=#
     return nothing
 end#=}}}=#
 
+"""
+    function manifold_dimension(
+        M::Segre{valence, 𝔽}
+        )
+"""
 function manifold_dimension(#={{{=#
     M::Segre{valence, 𝔽}
     ) where {valence, 𝔽}
@@ -163,6 +169,14 @@ function manifold_dimension(#={{{=#
     return 1 + sum([d - 1 for d in valence])
 end#=}}}=#
 
+"""
+    function get_coordinates(
+        M::Segre{valence, ℝ},
+        p,
+        v,
+        B::DefaultOrthonormalBasis
+        )
+"""
 function get_coordinates(#={{{=#
     M::Segre{valence, ℝ},
     p,
@@ -182,6 +196,14 @@ function get_coordinates(#={{{=#
     return vcat(coords...)
 end#=}}}=#
 
+"""
+    function get_vector(
+        M::Segre{valence, ℝ},
+        p,
+        X,
+        B::DefaultOrthonormalBasis
+        )
+"""
 function get_vector(#={{{=#
     M::Segre{valence, ℝ},
     p,
@@ -206,12 +228,16 @@ function get_vector(#={{{=#
     return v
 end#=}}}=#
 
-# TODO
-function to_tucker(M::Segre)::Tucker#={{{=#
-    throw("Not implemented")
-end#=}}}=#
+"""
+    function inner(
+        M::Segre{valence, 𝔽},
+        p,
+        u,
+        v,
+        )
 
-# TODO
+Inner product between two tangent vectors `u` and `v` at `p`.
+"""
 function inner(#={{{=#
     M::Segre{valence, 𝔽},
     p,
@@ -223,7 +249,13 @@ function inner(#={{{=#
 end#=}}}=#
 
 """
-Normalize a vector in the tangent space
+    function normalize(
+        M::AbstractManifold,
+        p,
+        v
+        )
+
+Normalize a tangent vector `v` at `p`.
 """
 function normalize(#={{{=#
     M::AbstractManifold,
@@ -234,6 +266,15 @@ function normalize(#={{{=#
     return v / norm(M, p, v)
 end#=}}}=#
 
+"""
+    function norm(
+        M::Segre{valence, ℝ},
+        p,
+        v
+        )
+
+Norm of tangent vector `v` at `p`.
+"""
 function norm(#={{{=#
     M::Segre{valence, ℝ},
     p,
@@ -247,6 +288,12 @@ function norm(#={{{=#
         )
 end#=}}}=#
 
+"""
+    function rand(
+        M::Segre{valence, ℝ};
+        vector_at=nothing,
+        )
+"""
 function rand(#={{{=#
     M::Segre{valence, ℝ};
     vector_at=nothing,
@@ -263,7 +310,13 @@ function rand(#={{{=#
 end#=}}}=#
 
 """
-Embed p ∈ Segre((n1, ..., nd), F) in F^{n1 x ... x nd}
+    function embed_vector(
+        M::Segre{valence, 𝔽},
+        p,
+        v
+        )
+
+Embed `p ∈ Segre((n1, ..., nd), F)` in `F^{n1 x ... x nd}`
 """
 function embed(#={{{=#
     M::Segre{valence, 𝔽},
@@ -273,6 +326,15 @@ function embed(#={{{=#
     return kronecker(p...)[:, 1]
 end#=}}}=#
 
+"""
+    function embed_vector(
+        M::Segre{valence, 𝔽},
+        p,
+        v
+        )
+
+Embed `v ∈ T_p Segre((n1, ..., nd), F)` in `F^{n1 x ... x nd}`
+"""
 function embed_vector(#={{{=#
     M::Segre{valence, 𝔽},
     p,
@@ -291,7 +353,16 @@ function embed_vector(#={{{=#
         ])
 end#=}}}=#
 
-# Theorem 1.1 in Swijsen21
+
+"""
+    function exp(
+        M::Segre{valence, ℝ},
+        p,
+        v
+        )
+
+Exponential map on Segre manifold. Theorem 1.1 in Swijsen 2021.
+"""
 function exp(#={{{=#
     M::Segre{valence, ℝ},
     p,
@@ -304,7 +375,17 @@ function exp(#={{{=#
     return q
 end#=}}}=#
 
-function exp!(# {{{
+"""
+    function exp!(
+        M::Segre{valence, 𝔽},
+        q,
+        p,
+        v
+        )
+
+Exponential map on Segre manifold. Theorem 1.1 in Swijsen 2021.
+"""
+function exp!(#={{{=#
     M::Segre{valence, 𝔽},
     q,
     p,
@@ -340,10 +421,19 @@ function exp!(# {{{
     end
 
     return 0
-end# }}}
+end#=}}}=#
 
 # Theorem 6.2.1 in thesisLarsSwijsen
-function log(# {{{
+"""
+    function log(
+        M::Segre{valence, ℝ},
+        p,
+        q
+        )
+
+Logarithmic map on Segre manifold.
+"""
+function log(#={{{=#
     M::Segre{valence, ℝ},
     p,
     q
@@ -391,9 +481,19 @@ function log(# {{{
     end
 
     return v
-end# }}}
+end#=}}}=#
 
-function log!(# {{{
+"""
+    function log!(
+        M::Segre{valence, 𝔽},
+        v,
+        p,
+        q
+        )
+
+Logarithmic map on Segre manifold.
+"""
+function log!(#={{{=#
     M::Segre{valence, 𝔽},
     v,
     p,
@@ -424,9 +524,17 @@ function log!(# {{{
     end
 
     return 0
-end# }}}
+end#=}}}=#
 
-function distance(# {{{
+"""
+    function distance(
+        M::Segre{valence, 𝔽},
+        p,
+        q
+        )
+Riemannian distance between two points `p` and `q` on the Segre manifold.
+"""
+function distance(#={{{=#
     M::Segre{valence, 𝔽},
     p,
     q
@@ -434,9 +542,19 @@ function distance(# {{{
 
     # TODO: Write down the closed-form expression for the distance
     return norm(M, p, log(M, p, q))
-end# }}}
+end#=}}}=#
 
 # TODO: Check factor of p[1][1]
+"""
+    function second_fundamental_form(
+        M::Segre{valence, 𝔽},
+        p,
+        u,
+        v
+        )
+
+Second fundamental form of the Segre manifold embedded with `embed`.
+"""
 function second_fundamental_form(#={{{=#
     M::Segre{valence, 𝔽},
     p,
@@ -459,7 +577,17 @@ function second_fundamental_form(#={{{=#
     return h
 end#=}}}=#
 
-# TODO: do this without embedding?
+# TODO: do this without embedding
+"""
+    function sectional_curvature(
+        M::Segre{valence, 𝔽},
+        p,
+        u,
+        v
+        )
+
+Sectional curvature of the Segre manifold in the plane spanned by tangent vectors `u` and `v` at `p`.
+"""
 function sectional_curvature(#={{{=#
     M::Segre{valence, 𝔽},
     p,

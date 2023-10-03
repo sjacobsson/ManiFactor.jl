@@ -1,5 +1,4 @@
-import LinearAlgebra:
-    normalize
+import LinearAlgebra: normalize
 
 # Just some quality of life functions
 

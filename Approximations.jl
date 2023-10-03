@@ -1,20 +1,17 @@
-using#={{{=#
-    ManifoldsBase,
-    Manifolds,
-    Kronecker, # TODO: is this needed?
-    SplitApplyCombine, #TODO: is this needed?
-    Plots#=}}}=#
+using ManifoldsBase
+using Manifolds
+using Kronecker
+using SplitApplyCombine #TODO: is this needed?
+using Plots
 
 include("QOL.jl")
 include("segre manifold/Segre.jl")
 include("../approximating vector-valued maps/Approximations.jl") # TODO: Make Approximations into a package
 
-
 """
     function approximate(
+        m::Int,
         M::AbstractManifold,
-        m::Int64,
-        n::Int64,
         f::Function; # :: [-1, 1]^m -> M^n
         base_approximate=approximate_vector::Function, # :: (m::Int) -> (n::Int) -> ([-1, 1]^m -> R^n) -> ([-1, 1]^m -> R^n)
         kwargs...
@@ -27,12 +24,12 @@ function approximate(#={{{=#
     M::AbstractManifold,
     f::Function; # :: [-1, 1]^m -> M^n
     base_approximate=approximate_vector::Function, # :: (m::Int) -> (n::Int) -> ([-1, 1]^m -> R^n) -> ([-1, 1]^m -> R^n)
-    # TODO: chart?
+    # TODO: provice chart as an option?
     kwargs...
     )::Function # :: [-1, 1]^m -> M^n
 
     # Evaluate f on a point cloud in [-1, 1]^m
-    xs = [2.0 * rand(m) .- 1.0 for _ in 1:100] # TODO: How to choose nbr of xs
+    xs = [2.0 * rand(m) .- 1.0 for _ in 1:100]
     fs = f.(xs)
     
     # Choose a point on M and linearize from there
