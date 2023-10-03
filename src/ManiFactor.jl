@@ -1,3 +1,5 @@
+module ManiFactor
+
 using ManifoldsBase
 using Manifolds
 using Kronecker
@@ -43,3 +45,5 @@ function approximate(#={{{=#
     fhat = chart_inv ∘ ghat
     return fhat
 end#=}}}=#
+
+end
