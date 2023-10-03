@@ -6,4 +6,5 @@ Depends on `ApproximatingMapsBetweenLinearSpaces.jl`, which is available at TODO
 
 ## Example 1
 
-Approximate $$f \colon [-1, 1]^2 \to S^2,\\ (x, y) \mathrm{stereographic projection}(x^2 - y^2, 2 x y).$$
+Approximate
+$$f \colon [-1, 1]^2 \to S^2, (x, y) \mapsto \mathrm{stereographic~projection}(x^2 - y^2, 2 x y).$$
