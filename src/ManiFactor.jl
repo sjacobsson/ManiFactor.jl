@@ -7,7 +7,7 @@ using SplitApplyCombine #TODO: is this needed?
 using Plots
 
 include("QOL.jl")
-include("segre manifold/Segre.jl")
+include("segre/Segre.jl")
 include("../approximating vector-valued maps/Approximations.jl") # TODO: Make Approximations into a package
 
 """
