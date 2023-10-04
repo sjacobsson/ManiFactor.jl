@@ -32,4 +32,6 @@ This figure illustrates the approximation accuracy compared to what is predicted
 
 ![Plot](examples/Example3.png)
 
+$N$ is the number of sample points in each direction, so that the total number of sample points is $N^3$.
+
 TODO: cite article.
