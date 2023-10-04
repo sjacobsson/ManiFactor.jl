@@ -26,7 +26,7 @@ This figure illustrates the approximation accuracy by showing the image on $H^2$
 ## Example 3
 
 Approximate
-$$f \colon [-1, 1]^3 \to \mathrm{Segre}(30, 30), x \mapsto \frac{\exp{x_1}}{2} \exp{(-W_1 x_2)} \vec{1} (\exp{(-W_2 x_3)} \vec{1})^\mathrm{T}$$
+$$f \colon [-1, 1]^3 \to \mathrm{Segre}(30, 30), x \mapsto \frac{1}{2} \exp{x_1} \exp{(W_1 x_2)} \vec{1} (\exp{(W_2 x_3)} \vec{1})^\mathrm{T}$$
 where $W_1$ and $W_2$ are randomly chosen antisymmetric $30 \times 30$ matrices and $\vec{1} = (1, 0, \dots, 0)$.
 This figure illustrates the approximation accuracy compared to what is predicted by the theory:
 
