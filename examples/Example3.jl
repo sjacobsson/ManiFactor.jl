@@ -66,7 +66,7 @@ end
 
 p = plot(Ns, bs;
     label="error bound",
-    xlabel="nbr sample points in each direction",
+    xlabel="N",
     xticks=Ns,
     yaxis=:log,
     ylims=(1e-16, 2 * maximum([es..., bs...])),
