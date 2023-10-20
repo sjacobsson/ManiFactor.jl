@@ -10,35 +10,35 @@ using Plots; pyplot()
 m=3
 Ns=2:1:16
 
-k=30
-M = Segre((k, k))
+s=30
+M = Segre((s, s))
 
 # f(x) is the closest rank 1 approximation to
-#   exp(x1) exp(V x2) diag(2^-1, 2^-2, ...) exp(W x2)
+#   exp(a x1) exp(V x2) diag(2^-1, 2^-2, ...) exp(W x2)
 Random.seed!(420)
-W1 = normalize(rand(k, k)); W1 = (W1 - W1') / 2
-W2 = normalize(rand(k, k)); W2 = (W2 - W2') / 2
+W1 = rand(s, s); W1 = W1 / norm(W1); W1 = (W1 - W1') / 2
+W2 = rand(s, s); W2 = W2 / norm(W2); W2 = (W2 - W2') / 2
 function f(x) # :: [-1, 1]^m -> Segre((k, k))
     return [
-        [exp(x[1]) / 2.0],
-        exp(-W1 * x[2]) * [1, zeros(k - 1)...],
-        exp(-W2 * x[3]) * [1, zeros(k - 1)...]
+        [exp(x[1])],
+        exp(-W1 * x[2]) * [1, zeros(s - 1)...],
+        exp(-W2 * x[3]) * [1, zeros(s - 1)...]
         ]
 end
 
-V1(nu) = 1 / 2 # Bound for |(d/dx1)^nu f(x)|
-V2(nu) = norm(W1)^nu / 2 # Bound for |(d/dx2)^nu f(x)|
-V3(nu) = norm(W2)^nu / 2 # Bound for |(d/dx3)^nu f(x)|
-sigma = maximum([ # Radius of chart
-    distance(M, f(zeros(m)), f(x))
-    for x in [2 * rand(m) .- 1.0 for _ in 1:1000]])
-H = -1.0 / (0.5)^2 # Lower bound for curvature
+sigma = sqrt(2) * max(opnorm(W1), opnorm(W2)) + exp(1) - 1 # Radius of chart
+H = -exp(2) # Lower bound for curvature
 Lambda(N) = (2 / pi) * log(N + 1) + 1 # Chebyshev interpolation operator norm
+C1(rho) = exp((rho + rho^-1) / 2) - 1
+V2(nu) = 2 * opnorm(W1)^(nu + 1) # Bound for variation(|(d/dx2)^nu f(x)|)
+V3(nu) = 2 * opnorm(W2)^(nu + 1) # Bound for variation(|(d/dx3)^nu f(x)|)
 epsilon(N) = minimum([ # Bound for |g - ghat|
-    4 * V1(nu1) / (pi * nu1 * (N - nu1)^nu1) +
-    4 * V2(nu2) * Lambda(N) / (pi * nu2 * (N - nu2)^nu2) +
-    4 * V3(nu3) * Lambda(N)^2 / (pi * nu3 * (N - nu3)^nu3)
-    for nu1 in 1:(N - 1) for nu2 in 1:(N - 1) for nu3 in 1:(N - 1)])
+    4 / ((rho - 1) * rho^N) * C1(rho) + 
+    # 4 * Lambda(N) / ((rho - 1) * rho^N) * C2(rho) + 
+    4 * V2(nu) * Lambda(N) / (pi * nu * (N - nu)^nu) +
+    # 4 * Lambda(N)^2 / ((rho - 1) * rho^N) * C3(rho) 
+    4 * V3(nu) * Lambda(N)^2 / (pi * nu * (N - nu)^nu)
+    for rho in LinRange(1.01, 40.0, 100) for nu in 1:(N - 1)])
 
 # Bound for d(f(x), fhat(x))
 b(N) = epsilon(N) + 2 / sqrt(abs(H)) * asinh(epsilon(N) * sinh(sqrt(abs(H)) * sigma) / (2 * sigma))
@@ -72,6 +72,8 @@ p = plot(Ns, bs;
     yticks=([1e0, 1e-5, 1e-10, 1e-15]),
     legend=:topright,
     )
+# plot!(p, Ns, epsilon.(Ns);
+#     label="epsilon")
 scatter!(p, Ns, es;
     label="measured error")
 display(p)
