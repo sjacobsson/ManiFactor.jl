@@ -300,6 +300,7 @@ function rand(#={{{=#
     M::Segre{valence, ℝ};
     vector_at=nothing,
     ) where {valence}
+    normalize(x) = x / norm(x)
 
     if isnothing(vector_at)
         xs = [normalize(2 * rand(n) .- 1) for n in valence]

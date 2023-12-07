@@ -3,13 +3,12 @@ module ManiFactor
 using ManifoldsBase
 using Manifolds
 using ApproximatingMapsBetweenLinearSpaces
-using Kronecker
-using SplitApplyCombine #TODO: is this needed?
 include("segre/Segre.jl")
-# include("../approximating vector-valued maps/Approximations.jl") # TODO: Make Approximations into a package
 
 export
-    approximate
+    approximate,
+    get_p,
+    get_ghat
 
 """
     function approximate(
@@ -45,6 +44,28 @@ function approximate(#={{{=#
     ghat = base_approximate(m, manifold_dimension(M), g; kwargs...)
     fhat = chart_inv ∘ ghat
     return fhat
+end#=}}}=#
+
+"""
+    function get_p(
+        fhat
+        )
+
+If fhat is an output from approximate(m, M, f), get the point p around which M is linearized.
+"""
+function get_p(fhat)#={{{=#
+    return getfield(getfield(getfield(fhat, 1), 1), 2)
+end#=}}}=#
+
+"""
+    function get_ghat(
+        fhat
+        )
+
+If fhat is an output from approximate(m, M, f), get the approximation ghat on the tangent space.
+"""
+function get_ghat(fhat)#={{{=#
+    return getfield(fhat, 2)
 end#=}}}=#
 
 end

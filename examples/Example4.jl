@@ -1,87 +1,77 @@
-# TODO: Probably I will have to implement exponential and logarithmic maps etc for the Grassmannian myself
-function nullspace(;#={{{=#
-    m = 4,
-    n1 = 40,
-    n2 = 60,
-    Ns=2:2:14,
-    verbose=false,
-    savefigure=false,
-    kwargs...
+# Approximate a function f: [-1, 1]^m -> Gr(n, k)
+using Manifolds
+using ManiFactor
+using ApproximatingMapsBetweenLinearSpaces: chebfun
+using TensorToolbox: hosvd
+using LinearAlgebra
+using Random
+using Plots; pyplot()
+
+m = 2
+Ns = 2:22
+
+n = 100
+k = 3
+M = Grassmann(n, k)
+
+# TODO: Cite Higham
+Random.seed!(3)
+A = SymTridiagonal(2 * ones(n), -1 * ones(n - 1))
+A[end] = 1.0
+B = SymTridiagonal(4 * ones(n), ones(n - 1))
+B[end] = 2.0
+C = zeros(n, n)
+C[end] = 1.0
+b = rand(n)
+function f(x) # :: [-1, 1]^m -> Grasssmann(n, k)
+    lambda = x[1] + 3
+    sigma = x[2]
+    h = 1.0 / n
+    R = A / h - lambda * h * B / 6 + lambda / (lambda - sigma) * C
+    krylov = hcat([R^i * b for i in 0:(k - 1)]...)
+    return Matrix(qr(krylov).Q)
+end
+
+# Loop over nbr of interpolation points
+es = [NaN for _ in Ns]
+bs = [NaN for _ in Ns]
+for (i, N) = enumerate(Ns)
+    local fhat = approximate(
+        m,
+        M,
+        f;
+        univariate_scheme=chebfun(N),
+        decomposition_method=hosvd,
+        eps_rel=1e-15,
+        )
+
+    local p = get_p(fhat)
+    local ghat = get_ghat(fhat)
+    local g = (X -> get_coordinates(M, p, X, DefaultOrthonormalBasis())) ∘ (x -> log(M, p, f(x)))
+
+    xs = [2 * rand(m) .- 1.0 for _ in 1:1000]
+    es[i] = maximum([distance(M, f(x), fhat(x)) for x in xs])
+    bs[i] = maximum([norm(g(x) - ghat(x)) for x in xs])
+end
+
+p = plot(Ns, bs;
+    label="error bound",
+    xlabel="N",
+    xticks=Ns,
+    yaxis=:log,
+    ylims=(1e-16, 2 * maximum([es..., bs...])),
+    yticks=([1e0, 1e-5, 1e-10, 1e-15]),
+    legend=:topright,
     )
+scatter!(p, Ns, es;
+    label="measured error")
+cs = [(2 + sqrt(3))^-N for N in Ns]
+scatter!(p, Ns, cs;
+    label="1 / (2 + sqrt(3))^N")
+display(p)
 
-    n = 1 + (n1 - 1) + (n2 - 1)
-    M = Segre((n1, n2))
-    
-    Random.seed!(420)
-    a = LinearAlgebra.normalize(rand(n1))
-    b = LinearAlgebra.normalize(rand(n2))
-    As = [LinearAlgebra.normalize(rand(n1, n2)) for _ in 1:m]
-    function f(x) # : [-1, 1]^m -> Segre((m1, m2))
-        U, S, Vt = svd(
-            sum([xi * A for (xi, A) in zip(x, As)]) + 
-            2 * m * a * b'
-            )
-        # return TODO: return element on the Grassmannian
-    end
-
-    # V(nu) = TODO
-
-    global fhat
-    es = [NaN for _ in Ns]
-    bs = [NaN for _ in Ns]
-    for (i, N) = enumerate(Ns)
-        if verbose; println(i, "/", length(Ns)); end
-
-        # Compute bound on manifold error
-        sigma = maximum([
-            distance(M, f(zeros(m)), f(x))
-            for x in [2 * rand(m) .- 1.0 for _ in 1:100]])
-        H = 0.0
-        Lambda(N) = (2 / pi) * log(N + 1) + 1
-        epsilon = minimum([
-            4 * V(nu) * (Lambda(N)^m - 1) / (pi * nu * big(N - nu)^nu * (Lambda(N) - 1))
-            for nu in 1:(N - 1)])
-        bs[i] = epsilon + 2 / sqrt(abs(H)) * asinh(epsilon * sinh(sqrt(abs(H)) * sigma) / (2 * sigma))
-
-        fhat = approximate(M, m, n, f; res=N, kwargs...)
-
-        # TODO: calculate max betterly
-        es[i] = maximum([
-            distance(M, f(x), fhat(x))
-            for x in [2 * rand(m) .- 1.0 for _ in 1:100]])
-
-        if verbose
-            println("error ", es[i])
-            x = ones(m) - 2.0 * rand(m)
-            print("evaluating f     ")
-            @time(f(x))
-            print("evaluating fhat  ")
-            @time(fhat(x))
-            println()
-        end
-
-    end
-
-    # plot(Ns, bs; yaxis=:log, label="error bound", xlabel="N")
-    p = plot(Ns, bs;
-        label="error bound",
-        xlabel="N",
-        xticks=Ns,
-        yaxis=:log,
-        ylims=(1e-16, 2 * maximum([es..., bs...])),
-        yticks=([1e0, 1e-5, 1e-10, 1e-15]),
-        windowsize=(240, 160),
-        guidefontsize=5, # TODO: How does this relate to the fontize in latex?
-        xtickfontsize=5,
-        ytickfontsize=5,
-        legendfontsize=5,
-        )
-    scatter!(Ns, es;
-        label="measured error",
-        color=2,
-        markersize=3,
-        )
-    if savefigure; savefig("closest_rank_one_matrix.pdf"); end
-    display(p)
-end#=}}}=#
-
+# # To save figure and data to file:
+# using CSV
+# using DataFrames: DataFrame
+# savefig("Example4.png")
+# CSV.write("Example4.csv", DataFrame([:Ns => Ns, :es => es, :bs => bs, :cs => cs]))
