@@ -26,8 +26,8 @@ This figure illustrates the approximation accuracy by showing the image on $H^2$
 ## Example 3
 
 Approximate
-$$f \colon [-1, 1]^3 \to \mathrm{Segre}(30, 30), x \mapsto \frac{1}{2} \exp{x_1} \exp{(W_1 x_2)} \vec{1} (\exp{(W_2 x_3)} \vec{1})^\mathrm{T}$$
-where $W_1$ and $W_2$ are randomly chosen antisymmetric $30 \times 30$ matrices and $\vec{1} = (1, 0, \dots, 0)$.
+$$f \colon [-1, 1]^3 \to \mathrm{Segre}(30, 30), x \mapsto \frac{1}{2} \exp{x_1} \exp{(W_1 x_2)} e_1 (\exp{(W_2 x_3)} e_1)^\mathrm{T}$$
+where $W_1$ and $W_2$ are randomly chosen antisymmetric $30 \times 30$ matrices and $e_1 = (1, 0, \dots, 0)$.
 This figure illustrates the approximation accuracy compared to what is predicted by the theory:
 
 ![Plot](examples/Example3.png)
@@ -40,9 +40,9 @@ TODO: cite article.
 
 Approximate
 $$f \colon [2, 4] \times [-1, 1] \to \mathrm{Gr}(100, 3), x \mapsto \mathrm{span}\{b, A(x) b, A(x)^2, A(x)^3 b\}$$
-where
+where $b$ is a random $100$-vector and
 $$
-A(x) = \frac{1}{h}
+A(x) = 100
 \begin{bmatrix}
 	2	&	-1		&\\
 	-1	&	\ddots 	&	\ddots\\
@@ -50,7 +50,7 @@ A(x) = \frac{1}{h}
 		&			&	-1	&	1
 \end{bmatrix}
 -
-\frac{x_1 h}{6}
+\frac{x_1}{600}
 \begin{bmatrix}
 	4	&	1		&\\
 	1	&	\ddots 	&	\ddots\\

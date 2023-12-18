@@ -14,6 +14,11 @@ n = 100
 k = 3
 M = Grassmann(n, k)
 
+# Fix some stuff
+import ManifoldsBase: get_coordinates_orthonormal, get_vector_orthonormal
+get_coordinates_orthonormal(::Grassmann{<:Any, <:Any, ℝ}, ::Matrix{Float64}, v::Matrix{Float64}, _) = v[:]
+get_vector_orthonormal(::Grassmann{n, k, ℝ}, ::Matrix{Float64}, c::Vector{Float64}, _) where {n, k} = reshape(c, (n, k))
+
 # TODO: Cite Higham
 Random.seed!(3)
 A = SymTridiagonal(2 * ones(n), -1 * ones(n - 1))
@@ -66,8 +71,8 @@ p = plot(Ns, bs;
 scatter!(p, Ns, es;
     label="measured error")
 cs = [(2 + sqrt(3))^-N for N in Ns]
-scatter!(p, Ns, cs;
-    label="1 / (2 + sqrt(3))^N")
+# scatter!(p, Ns, cs;
+#     label="1 / (2 + sqrt(3))^N")
 display(p)
 
 # # To save figure and data to file:
