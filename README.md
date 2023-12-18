@@ -35,3 +35,42 @@ This figure illustrates the approximation accuracy compared to what is predicted
 $N$ is the number of sample points in each direction, so that the total number of sample points is $N^3$.
 
 TODO: cite article.
+
+## Example 3
+
+Approximate
+$$f \colon [2, 4] \times [-1, 1] \to \mathrm{Gr}(100, 3), x \mapsto \mathrm{span}\{b, A(x) b, A(x)^2, A(x)^3 b\}$$
+where
+$$
+A(x) = \frac{1}{h}
+\begin{bmatrix}
+	2	&	-1		&\\
+	-1	&	\ddots 	&	\ddots\\
+		&	\ddots	&	2	&	-1\\
+		&			&	-1	&	1
+\end{bmatrix}
+-
+\frac{x_1 h}{6}
+\begin{bmatrix}
+	4	&	1		&\\
+	1	&	\ddots 	&	\ddots\\
+		&	\ddots	&	4	&	1\\
+		&			&	1	&	2
+\end{bmatrix}
++
+\frac{x_1}{x_1 - x_2}
+\begin{bmatrix}
+	0	&			&\\
+		&	\ddots	&	\\
+		&			&	0	&	\\
+		&			&		&	1
+\end{bmatrix}
+$$
+See the [NLEVP](https://eprints.maths.manchester.ac.uk/2697/3/nlevp_ugVer4.pdf) repository.
+This figure illustrates the approximation accuracy compared to what is predicted by the theory:
+
+![Plot](examples/Example4.png)
+
+$N$ is the number of sample points in each direction, so that the total number of sample points is $N^3$.
+
+TODO: cite article.
