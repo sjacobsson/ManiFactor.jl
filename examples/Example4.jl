@@ -59,8 +59,7 @@ for (i, N) = enumerate(Ns)
     bs[i] = maximum([norm(g(x) - ghat(x)) for x in xs])
 end
 
-p = plot(Ns, bs;
-    label="error bound",
+p = plot(
     xlabel="N",
     xticks=Ns,
     yaxis=:log,
@@ -68,8 +67,8 @@ p = plot(Ns, bs;
     yticks=([1e0, 1e-5, 1e-10, 1e-15]),
     legend=:topright,
     )
-scatter!(p, Ns, es;
-    label="measured error")
+plot!(p, Ns[1:end - 2], bs[1:end - 2]; label="error bound")
+scatter!(p, Ns, es; label="measured error")
 cs = [(2 + sqrt(3))^-N for N in Ns]
 # scatter!(p, Ns, cs;
 #     label="1 / (2 + sqrt(3))^N")

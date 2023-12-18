@@ -57,8 +57,7 @@ for (i, N) = enumerate(Ns)
         end
 end
 
-p = plot(Ns, bs;
-    label="error bound",
+p = plot(;
     xlabel="N",
     xticks=Ns,
     yaxis=:log,
@@ -66,8 +65,8 @@ p = plot(Ns, bs;
     yticks=([1e0, 1e-5, 1e-10, 1e-15]),
     legend=:topright,
     )
-scatter!(p, Ns, es;
-    label="measured error")
+plot!(p, Ns[1:end-3], bs[1:end-3]; label="error bound")
+scatter!(p, Ns, es; label="measured error")
 display(p)
 
 # # To save figure and data to file:
