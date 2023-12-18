@@ -36,7 +36,7 @@ $N$ is the number of sample points in each direction, so that the total number o
 
 TODO: cite article.
 
-## Example 3
+## Example 4
 
 Approximate
 $$f \colon [2, 4] \times [-1, 1] \to \mathrm{Gr}(100, 3), x \mapsto \mathrm{span}\{b, A(x) b, A(x)^2, A(x)^3 b\}$$
