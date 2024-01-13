@@ -1,7 +1,7 @@
 # Approximate a function f: [-1, 1]^2 -> H^2
 using Manifolds: Hyperbolic
 using ManiFactor
-using ApproximatingMapsBetweenLinearSpaces: chebfun
+using ApproximatingMapsBetweenLinearSpaces: chebyshev
 using LinearAlgebra
 using Plots; pyplot(); import Plots: (plot!)
 
@@ -93,19 +93,19 @@ end#=}}}=#
 M = Hyperbolic(2)
 f(x) = stereographic_projection(0.25 * [x[1]^2 - x[2]^2, 2 * x[1] * x[2]]; pole=3)
 
-fhat = approximate(2, M, f, univariate_scheme=chebfun(3))
+fhat = approximate(2, M, f, univariate_scheme=chebyshev(3))
 p1 = plot(; title="9 samples")
 plot!(p1, M)
 plot_grid!(p1, M, f; label="f", color="cyan")
 plot_grid!(p1, M, fhat; label="fhat", color="magenta", linestyle=:dot)
 
-fhat = approximate(2, M, f, univariate_scheme=chebfun(4))
+fhat = approximate(2, M, f, univariate_scheme=chebyshev(4))
 p2 = plot(; title="16 samples")
 plot!(p2, M)
 plot_grid!(p2, M, f; label="f", color="cyan")
 plot_grid!(p2, M, fhat; label="fhat", color="magenta", linestyle=:dot)
 
-fhat = approximate(2, M, f, univariate_scheme=chebfun(5))
+fhat = approximate(2, M, f, univariate_scheme=chebyshev(5))
 p3 = plot(; title="25 samples")
 plot!(p3, M)
 plot_grid!(p3, M, f; label="f", color="cyan")

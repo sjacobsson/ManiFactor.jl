@@ -1,8 +1,8 @@
 # Approximate a function f: [-1, 1]^3 -> Seg((k, k))
 using Manifolds
 using ManiFactor
-using ApproximatingMapsBetweenLinearSpaces: chebfun
-using TensorToolbox: hosvd
+using ApproximatingMapsBetweenLinearSpaces: chebyshev
+using TensorToolbox: sthosvd # Available tensor decomposition methods are `sthosvd`, `hosvd`, `TTsvd`, `TTsvd_incomplete`, `TTsvd_cross`, `cp_als`.
 using LinearAlgebra
 using Random
 using Plots; pyplot()
@@ -37,9 +37,9 @@ for (i, N) = enumerate(Ns)
         m,
         M,
         f;
-        univariate_scheme=chebfun(N),
-        decomposition_method=hosvd,
-        eps_rel=1e-15,
+        univariate_scheme=chebyshev(N),
+        decomposition_method=sthosvd,
+        tol=1e-15,
         )
 
     local p = get_p(fhat)
