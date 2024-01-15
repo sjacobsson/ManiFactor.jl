@@ -2,7 +2,7 @@
 using Manifolds
 using ManiFactor
 using ApproximatingMapsBetweenLinearSpaces: chebyshev
-using TensorToolbox: sthosvd # Available tensor decomposition methods are `sthosvd`, `hosvd`, `TTsvd`, `TTsvd_incomplete`, `TTsvd_cross`, `cp_als`.
+using TensorToolbox: sthosvd # Available tensor decomposition methods are `sthosvd`, `hosvd`, `TTsvd`, `cp_als`.
 using LinearAlgebra
 using Random
 using Plots; pyplot()
@@ -39,7 +39,6 @@ for (i, N) = enumerate(Ns)
         f;
         univariate_scheme=chebyshev(N),
         decomposition_method=sthosvd,
-        tol=1e-15,
         )
 
     local p = get_p(fhat)
@@ -65,7 +64,7 @@ p = plot(;
     yticks=([1e0, 1e-5, 1e-10, 1e-15]),
     legend=:topright,
     )
-plot!(p, Ns[1:end-3], bs[1:end-3]; label="error bound")
+plot!(p, Ns[1:end-2], bs[1:end-2]; label="error bound")
 scatter!(p, Ns, es; label="measured error")
 display(p)
 

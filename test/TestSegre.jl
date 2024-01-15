@@ -1,4 +1,4 @@
-include("Segre.jl")
+include("../src/segre/Segre.jl")
 using StatsBase: sample
 
 # Verbose isapprox

@@ -2,7 +2,7 @@
 using Manifolds
 using ManiFactor
 using ApproximatingMapsBetweenLinearSpaces: chebyshev
-using TensorToolbox: sthosvd # Available tensor decomposition methods are `sthosvd`, `hosvd`, `TTsvd`, `TTsvd_incomplete`, `TTsvd_cross`, `cp_als`.
+using TensorToolbox: sthosvd # Available tensor decomposition methods are `sthosvd`, `hosvd`, `TTsvd`, `cp_als`.
 using LinearAlgebra
 using Random
 using Plots; pyplot()
@@ -15,9 +15,7 @@ k = 3
 M = Grassmann(n, k)
 
 # Fix some stuff
-import ManifoldsBase: get_coordinates_orthonormal, get_vector_orthonormal
-get_coordinates_orthonormal(::Grassmann{<:Any, <:Any, ℝ}, ::Matrix{Float64}, v::Matrix{Float64}, _) = v[:]
-get_vector_orthonormal(::Grassmann{n, k, ℝ}, ::Matrix{Float64}, c::Vector{Float64}, _) where {n, k} = reshape(c, (n, k))
+include("hotfix.jl")
 
 # TODO: Cite Higham
 Random.seed!(3)
@@ -47,7 +45,7 @@ for (i, N) = enumerate(Ns)
         f;
         univariate_scheme=chebyshev(N),
         decomposition_method=sthosvd,
-        tol=1e-15,
+        tolerance=1e-15,
         )
 
     local p = get_p(fhat)
