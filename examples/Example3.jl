@@ -4,7 +4,7 @@ using ManiFactor
 using ApproximatingMapsBetweenLinearSpaces: chebyshev
 using TensorToolbox: sthosvd # Available tensor decomposition methods are `sthosvd`, `hosvd`, `TTsvd`, `cp_als`.
 using LinearAlgebra
-using Random
+using Random; Random.seed!(1)
 using Plots; pyplot()
 
 m=3
@@ -15,7 +15,6 @@ M = Segre((s, s))
 
 # f(x) is the closest rank 1 approximation to
 #   exp(a x1) exp(V x2) diag(2^-1, 2^-2, ...) exp(W x2)
-Random.seed!(4)
 W1 = rand(s, s); W1 = (W1 - W1') / 2; W1 = W1 / norm(W1)
 W2 = rand(s, s); W2 = (W2 - W2') / 2; W2 = W2 / norm(W2)
 i = [1, zeros(s - 1)...]
@@ -32,21 +31,22 @@ H = -exp(2) # Lower bound for curvature
 # Loop over nbr of interpolation points
 es = [NaN for _ in Ns]
 bs = [NaN for _ in Ns]
+xs = [2 * rand(m) .- 1.0 for _ in 1:1000]
+p = mean(M, f.(xs))
+sigma = maximum([ distance(M, p, f(x)) for x in xs])
 for (i, N) = enumerate(Ns)
     local fhat = approximate(
         m,
         M,
         f;
+        p=p,
         univariate_scheme=chebyshev(N),
         decomposition_method=sthosvd,
         )
 
-    local p = get_p(fhat)
     local ghat = get_ghat(fhat)
     local g = (X -> get_coordinates(M, p, X, DefaultOrthonormalBasis())) ∘ (x -> log(M, p, f(x)))
-    local sigma = maximum([ distance(M, p, f(x)) for x in [2 * rand(m) .- 1.0 for _ in 1:1000]])
 
-    xs = [2 * rand(m) .- 1.0 for _ in 1:1000]
     es[i] = maximum([
         distance(M, f(x), fhat(x))
         for x in xs])

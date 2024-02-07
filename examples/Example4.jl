@@ -4,7 +4,7 @@ using ManiFactor
 using ApproximatingMapsBetweenLinearSpaces: chebyshev
 using TensorToolbox: sthosvd # Available tensor decomposition methods are `sthosvd`, `hosvd`, `TTsvd`, `cp_als`.
 using LinearAlgebra
-using Random
+using Random; Random.seed!(3)
 using Plots; pyplot()
 
 m = 2
@@ -18,7 +18,6 @@ M = Grassmann(n, k)
 include("hotfix.jl")
 
 # TODO: Cite Higham
-Random.seed!(3)
 A = SymTridiagonal(2 * ones(n), -1 * ones(n - 1))
 A[end] = 1.0
 B = SymTridiagonal(4 * ones(n), ones(n - 1))
@@ -38,21 +37,22 @@ end
 # Loop over nbr of interpolation points
 es = [NaN for _ in Ns]
 bs = [NaN for _ in Ns]
+xs = [2 * rand(m) .- 1.0 for _ in 1:1000]
+p = mean(M, f.(xs))
 for (i, N) = enumerate(Ns)
     local fhat = approximate(
         m,
         M,
         f;
+        p=p,
         univariate_scheme=chebyshev(N),
         decomposition_method=sthosvd,
         tolerance=1e-15,
         )
 
-    local p = get_p(fhat)
     local ghat = get_ghat(fhat)
     local g = (X -> get_coordinates(M, p, X, DefaultOrthonormalBasis())) ∘ (x -> log(M, p, f(x)))
 
-    xs = [2 * rand(m) .- 1.0 for _ in 1:1000]
     es[i] = maximum([distance(M, f(x), fhat(x)) for x in xs])
     bs[i] = maximum([norm(g(x) - ghat(x)) for x in xs])
 end
@@ -68,8 +68,7 @@ p = plot(
 plot!(p, Ns[1:end - 2], bs[1:end - 2]; label="error bound")
 scatter!(p, Ns, es; label="measured error")
 cs = [(2 + sqrt(3))^-N for N in Ns]
-# scatter!(p, Ns, cs;
-#     label="1 / (2 + sqrt(3))^N")
+scatter!(p, Ns, cs; label="1 / (2 + sqrt(3))^N")
 display(p)
 
 # # To save figure and data to file:
