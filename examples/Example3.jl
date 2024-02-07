@@ -1,39 +1,44 @@
-# Approximate a function f: [-1, 1]^3 -> Seg((k, k))
+# Approximate a function f: [-1, 1]^m -> Gr(n, k)
 using Manifolds
 using ManiFactor
 using ApproximatingMapsBetweenLinearSpaces: chebyshev
 using TensorToolbox: sthosvd # Available tensor decomposition methods are `sthosvd`, `hosvd`, `TTsvd`, `cp_als`.
 using LinearAlgebra
-using Random; Random.seed!(1)
+using Random; Random.seed!(2)
 using Plots; pyplot()
 
-m=3
-Ns=2:1:16
+m = 2
+Ns = 2:23
 
-s=100
-M = Segre((s, s))
+n = 100
+k = 3
+M = Grassmann(n, k)
 
-# f(x) is the closest rank 1 approximation to
-#   exp(a x1) exp(V x2) diag(2^-1, 2^-2, ...) exp(W x2)
-W1 = rand(s, s); W1 = (W1 - W1') / 2; W1 = W1 / norm(W1)
-W2 = rand(s, s); W2 = (W2 - W2') / 2; W2 = W2 / norm(W2)
-i = [1, zeros(s - 1)...]
-function f(x) # :: [-1, 1]^m -> Segre((k, k))
-    return [
-        [exp(x[1])],
-        exp(W1 * x[2]) * i,
-        exp(W2 * x[3]) * i
-        ]
+# Fix some stuff
+include("hotfix.jl")
+
+# TODO: Cite Higham
+A = SymTridiagonal(2 * ones(n), -1 * ones(n - 1))
+A[end] = 1.0
+B = SymTridiagonal(4 * ones(n), ones(n - 1))
+B[end] = 2.0
+C = zeros(n, n)
+C[end] = 1.0
+b = rand(n)
+function f(x) # :: [-1, 1]^m -> Grasssmann(n, k)
+    lambda = x[1] + 3
+    sigma = x[2]
+    h = 1.0 / n
+    R = A / h - lambda * h * B / 6 + lambda / (lambda - sigma) * C
+    krylov = hcat([R^i * b for i in 0:(k - 1)]...)
+    return Matrix(qr(krylov).Q)
 end
-
-H = -exp(2) # Lower bound for curvature
 
 # Loop over nbr of interpolation points
 es = [NaN for _ in Ns]
 bs = [NaN for _ in Ns]
 xs = [2 * rand(m) .- 1.0 for _ in 1:1000]
 p = mean(M, f.(xs))
-sigma = maximum([ distance(M, p, f(x)) for x in xs])
 for (i, N) = enumerate(Ns)
     local fhat = approximate(
         m,
@@ -42,21 +47,17 @@ for (i, N) = enumerate(Ns)
         p=p,
         univariate_scheme=chebyshev(N),
         decomposition_method=sthosvd,
+        tolerance=1e-15,
         )
 
     local ghat = get_ghat(fhat)
     local g = (X -> get_coordinates(M, p, X, DefaultOrthonormalBasis())) ∘ (x -> log(M, p, f(x)))
 
-    es[i] = maximum([
-        distance(M, f(x), fhat(x))
-        for x in xs])
-    bs[i] = let
-            epsilon = maximum([norm(g(x) - ghat(x)) for x in xs])
-            epsilon + 2 / sqrt(abs(H)) * asinh(epsilon * sinh(sqrt(abs(H)) * sigma) / (2 * sigma))
-        end
+    es[i] = maximum([distance(M, f(x), fhat(x)) for x in xs])
+    bs[i] = maximum([norm(g(x) - ghat(x)) for x in xs])
 end
 
-p = plot(;
+p = plot(
     xlabel="N",
     xticks=Ns,
     yaxis=:log,
@@ -64,12 +65,14 @@ p = plot(;
     yticks=([1e0, 1e-5, 1e-10, 1e-15]),
     legend=:topright,
     )
-plot!(p, Ns[1:end-2], bs[1:end-2]; label="error bound")
+plot!(p, Ns[1:end - 2], bs[1:end - 2]; label="error bound")
 scatter!(p, Ns, es; label="measured error")
+cs = [(2 + sqrt(3))^-N for N in Ns]
+scatter!(p, Ns, cs; label="1 / (2 + sqrt(3))^N")
 display(p)
 
 # # To save figure and data to file:
 # using CSV
 # using DataFrames: DataFrame
 # savefig("Example3.png")
-# CSV.write("Example3.csv", DataFrame([:Ns => Ns, :es => es, :bs => bs]))
+# CSV.write("Example3.csv", DataFrame([:Ns => Ns, :es => es, :bs => bs, :cs => cs]))
