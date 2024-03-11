@@ -4,40 +4,47 @@ using ManiFactor
 using ApproximatingMapsBetweenLinearSpaces: chebyshev
 using TensorToolbox: sthosvd # Available tensor decomposition methods are `sthosvd`, `hosvd`, `TTsvd`, `cp_als`.
 using LinearAlgebra
-using Random; Random.seed!(2)
+using Random; Random.seed!(3)
 using Plots; pyplot()
 
-m = 2
-Ns = 2:23
+m = 1
+Ns = 2:1:25
 
 n = 100
-k = 3
+k = 4
 M = Grassmann(n, k)
 
 # Fix some stuff
 include("hotfix.jl")
 
-# TODO: Cite Higham
-A = SymTridiagonal(2 * ones(n), -1 * ones(n - 1))
-A[end] = 1.0
-B = SymTridiagonal(4 * ones(n), ones(n - 1))
-B[end] = 2.0
-C = zeros(n, n)
-C[end] = 1.0
-b = rand(n)
+# Green's function for heat equation on [0, pi]
+a = 1 / 2
+K(x, y, t) = (1 / 2) * sum([sin.(l * x) * sin.(l * y) * exp(-t * a^2 * l^2) for l in 1:10])
+
+# Discretize K
+A(t) = K([pi * i / (n - 1) for i in 0:(n - 1)], [pi * i / (n - 1) for i in 0:(n - 1)]', t)
+
+v = normalize(2 * rand(n) .- 1.0)
 function f(x) # :: [-1, 1]^m -> Grasssmann(n, k)
-    lambda = x[1] + 3
-    sigma = x[2]
-    h = 1.0 / n
-    R = A / h - lambda * h * B / 6 + lambda / (lambda - sigma) * C
-    krylov = hcat([R^i * b for i in 0:(k - 1)]...)
-    return Matrix(qr(krylov).Q)
+
+     # Arnoldi iteration
+     qs = [zeros(n) for _ in 1:k] # Initialize
+     qs[1] = v
+     for i in 2:k
+         qs[i] = A(x[1] / 2 + 1.5) * qs[i - 1]
+         for j in 1:(i - 1)
+             qs[i] = qs[i] - dot(qs[j], qs[i]) * qs[j]
+         end
+         qs[i] = normalize(qs[i])
+     end
+     return hcat(qs...)
+
 end
 
 # Loop over nbr of interpolation points
 es = [NaN for _ in Ns]
 bs = [NaN for _ in Ns]
-xs = [2 * rand(m) .- 1.0 for _ in 1:1000]
+xs = [2 * rand(m) .- 1.0 for _ in 1:10000]
 p = mean(M, f.(xs))
 for (i, N) = enumerate(Ns)
     local fhat = approximate(
@@ -50,8 +57,8 @@ for (i, N) = enumerate(Ns)
         tolerance=1e-15,
         )
 
-    local ghat = get_ghat(fhat)
     local g = (X -> get_coordinates(M, p, X, DefaultOrthonormalBasis())) ∘ (x -> log(M, p, f(x)))
+    local ghat = get_ghat(fhat)
 
     es[i] = maximum([distance(M, f(x), fhat(x)) for x in xs])
     bs[i] = maximum([norm(g(x) - ghat(x)) for x in xs])
@@ -67,12 +74,25 @@ p = plot(
     )
 plot!(p, Ns[1:end - 2], bs[1:end - 2]; label="error bound")
 scatter!(p, Ns, es; label="measured error")
-cs = [(2 + sqrt(3))^-N for N in Ns]
-scatter!(p, Ns, cs; label="1 / (2 + sqrt(3))^N")
+# cs = [(3 + 2 * sqrt(2))^-N for N in Ns]
+# scatter!(p, Ns, cs; label="1 / (2 + sqrt(3))^N")
 display(p)
+
+# To see that k = 4 is enough for the Krylov subspace to capture the range of A,
+#   using IterativeSolvers
+#   b = A(2.0) * [0.5 - abs(i / (n - 1) - 0.5) for i in 0:(n - 1)] # Triangle initial condition
+#   gmres!(deepcopy(v), A(1.0), b; verbose=true, maxiter=10, restart=100)
+# outputs
+#   === gmres ===
+#   rest	iter	resnorm
+#   1       1       8.18e-02
+#   1       2       6.02e-02
+#   1       3       1.17e-03
+#   1       4       1.34e-05
+#   1       5       4.85e-09
 
 # # To save figure and data to file:
 # using CSV
 # using DataFrames: DataFrame
 # savefig("Example3.png")
-# CSV.write("Example3.csv", DataFrame([:Ns => Ns, :es => es, :bs => bs, :cs => cs]))
+# CSV.write("Example3.csv", DataFrame([:Ns => Ns, :es => es, :bs => bs]))
