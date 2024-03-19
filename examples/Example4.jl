@@ -42,7 +42,12 @@ for (i, N) = enumerate(Ns)
         p=p,
         univariate_scheme=chebyshev(N),
         decomposition_method=sthosvd,
+        # tolerance=1e-11,
         )
+
+    # To see what multilinear rank is used, add the line
+    #   println(mrank(G_decomposed))
+    # in approximate_vector
 
     local ghat = get_ghat(fhat)
     local g = (X -> get_coordinates(M, p, X, DefaultOrthonormalBasis())) ∘ (x -> log(M, p, f(x)))
@@ -56,7 +61,7 @@ for (i, N) = enumerate(Ns)
         end
 end
 
-p = plot(;
+plt = plot(;
     xlabel="N",
     xticks=Ns,
     yaxis=:log,
@@ -64,9 +69,9 @@ p = plot(;
     yticks=([1e0, 1e-5, 1e-10, 1e-15]),
     legend=:topright,
     )
-plot!(p, Ns[1:end-3], bs[1:end-3]; label="error bound")
-scatter!(p, Ns, es; label="measured error")
-display(p)
+plot!(plt, Ns[1:end-3], bs[1:end-3]; label="error bound")
+scatter!(plt, Ns, es)
+display(plt)
 
 # # To save figure and data to file:
 # using CSV
