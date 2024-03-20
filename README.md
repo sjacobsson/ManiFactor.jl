@@ -31,10 +31,11 @@ Approximate
 $$
 f \colon [1, 2]  \to \mathrm{Gr}(100, 3), t \mapsto \mathrm{span}\{b, A(t) b, A(t)^2, A(t)^3 b\}
 $$
-where $b$ is a random $100$-vector and $A(t)$ is a discretization of the kernel
+where $b$ is a random $100$-vector and $A(t)$ is the evaluation of the kernel
 $$
-K(x, x', t) = \frac{2}{\pi} \sum_{l = 1}^\infty \sin(l x) \sin(l x') \exp(-t l^2 / 4).
+K(x, x', t) = \frac{2}{\pi} \sum_{l = 1}^\infty \sin(l x) \sin(l x') \exp(-t l^2 / 4)
 $$
+on a $100 \times 100$ grid on $[0, \pi] \times [0, \pi]$.
 The kernel appears when solving the heat equation on a finite interval with endpoints held at a fixed temperature.
 This figure illustrates the approximation accuracy compared to what is predicted by the theory:
 
