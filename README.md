@@ -2,7 +2,9 @@
 
 Approximate functions of type $$\mathbb{R}^m \to M^n$$ where $M^n$ is an $n$-dimensional Riemannian manifold manifold.
 
-Depends on `ApproximatingMapsBetweenLinearSpaces.jl`, which is available at TODO.
+Depends on `ApproximatingMapsBetweenLinearSpaces.jl`, which is available at [gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces](https://gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces).
+
+If you use this software in your work, please cite TODO.
 
 ## Example 1
 
@@ -26,34 +28,14 @@ This figure illustrates the approximation accuracy by showing the image on $H^2$
 ## Example 3
 
 Approximate
-$$f \colon [2, 4] \times [-1, 1] \to \mathrm{Gr}(100, 3), x \mapsto \mathrm{span}\{b, A(x) b, A(x)^2, A(x)^3 b\}$$
-where $b$ is a random $100$-vector and
 $$
-A(x) = 100
-\begin{bmatrix}
-	2	&	-1		&\\
-	-1	&	\ddots 	&	\ddots\\
-		&	\ddots	&	2	&	-1\\
-		&			&	-1	&	1
-\end{bmatrix}
--
-\frac{x_1}{600}
-\begin{bmatrix}
-	4	&	1		&\\
-	1	&	\ddots 	&	\ddots\\
-		&	\ddots	&	4	&	1\\
-		&			&	1	&	2
-\end{bmatrix}
-+
-\frac{x_1}{x_1 - x_2}
-\begin{bmatrix}
-	0	&			&\\
-		&	\ddots	&	\\
-		&			&	0	&	\\
-		&			&		&	1
-\end{bmatrix}
+f \colon [1, 2]  \to \mathrm{Gr}(100, 3), t \mapsto \mathrm{span}\{b, A(t) b, A(t)^2, A(t)^3 b\}
 $$
-See the [NLEVP](https://eprints.maths.manchester.ac.uk/2697/3/nlevp_ugVer4.pdf) repository.
+where $b$ is a random $100$-vector and $A(t)$ is a discretization of the kernel
+$$
+K(x, x', t) = \frac{2}{\pi} \sum_{l = 1}^\infty \sin(l x) \sin(l x') \exp(-t l^2 / 4).
+$$
+The kernel appears when solving the heat equation on a finite interval with endpoints held at a fixed temperature.
 This figure illustrates the approximation accuracy compared to what is predicted by the theory:
 
 ![Plot](examples/Example3.png)

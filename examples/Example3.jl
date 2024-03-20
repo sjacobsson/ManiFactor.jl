@@ -1,10 +1,10 @@
 # Approximate a function f: [-1, 1]^m -> Gr(n, k)
+# TODO: Why I have to run this example twice?
 using Manifolds
 using ManiFactor
 using ApproximatingMapsBetweenLinearSpaces: chebyshev
 using TensorToolbox: sthosvd # Available tensor decomposition methods are `sthosvd`, `hosvd`, `TTsvd`, `cp_als`.
 using LinearAlgebra
-# using Random; Random.seed!(1)
 using Random; Random.seed!(1)
 using Plots; pyplot()
 
@@ -20,7 +20,7 @@ include("hotfix.jl")
 
 # Green's function for heat equation on [0, pi]
 a = 1 / 2
-infinity = 20
+infinity = 10
 K(x, y, t) = (pi / 2) * sum([sin.(l * x) * sin.(l * y) * exp(-t * a * l^2) for l in 1:infinity])
 
 # Discretize K
@@ -75,10 +75,10 @@ plt = plot(
     yticks=([1e0, 1e-5, 1e-10, 1e-15]),
     legend=:topright,
     )
-plot!(plt, Ns[1:end - 2], bs[1:end - 2]; label="error bound")
+plot!(plt, Ns[1:end - 3], bs[1:end - 3]; label="error bound")
 scatter!(plt, Ns, es; label="measured error")
 cs = [(3 + 2 * sqrt(2))^-N for N in Ns]
-scatter!(plt, Ns, cs; label="1 / (3 + 2 * sqrt(2))^N")
+# scatter!(plt, Ns, cs; label="1 / (3 + 2 * sqrt(2))^N")
 display(plt)
 
 # To see that k = 4 is enough for the Krylov subspace to capture the range of A,
