@@ -2,9 +2,21 @@
 
 Approximate functions of type $$\mathbb{R}^m \to M^n$$ where $M^n$ is an $n$-dimensional Riemannian manifold manifold.
 
-Depends on `ApproximatingMapsBetweenLinearSpaces.jl`, which is available at [gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces](https://gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces).
+To learn more about approximating maps into Riemannian manifolds, you can check out our preprint at [arxiv.org/abs/2403.16785](https://arxiv.org/abs/2403.16785).
 
-If you use this software in your work, please cite TODO.
+`ManiFactor.jl` depends on `ApproximatingMapsBetweenLinearSpaces.jl`, which is available at [gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces](https://gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces).
+
+If you use this software in your work, please cite
+```
+@misc{jacobsson2024,
+      title={Approximating maps into manifolds with lower curvature bounds}, 
+      author={Simon Jacobsson and Raf Vandebril and Joeri van der Veken and Nick Vannieuwenhoven},
+      year={2024},
+      eprint={2403.16785},
+      archivePrefix={arXiv},
+      primaryClass={math.NA}
+}
+```
 
 ## Example 1
 
@@ -43,7 +55,6 @@ This figure illustrates the approximation accuracy compared to what is predicted
 
 $N$ is the number of sample points in each direction, so that the total number of sample points is $N^2$.
 
-TODO: cite article.
 
 ## Example 4
 
@@ -55,5 +66,3 @@ This figure illustrates the approximation accuracy compared to what is predicted
 ![Plot](examples/Example4.png)
 
 $N$ is the number of sample points in each direction, so that the total number of sample points is $N^3$.
-
-TODO: cite article.
