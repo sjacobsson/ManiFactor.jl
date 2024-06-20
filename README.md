@@ -2,9 +2,7 @@
 
 Approximate functions of type $$\mathbb{R}^m \to M^n$$ where $M^n$ is an $n$-dimensional Riemannian manifold manifold.
 
-To learn more about approximating maps into Riemannian manifolds, you can check out our preprint at [arxiv.org/abs/2403.16785](https://arxiv.org/abs/2403.16785).
-
-`ManiFactor.jl` depends on `ApproximatingMapsBetweenLinearSpaces.jl`, which is available at [gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces](https://gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces).
+To learn more about approximating maps into Riemannian manifolds, check out our preprint at [arxiv.org/abs/2403.16785](https://arxiv.org/abs/2403.16785).
 
 If you use this software in your work, please cite
 ```
@@ -17,6 +15,9 @@ If you use this software in your work, please cite
       primaryClass={math.NA}
 }
 ```
+
+`ManiFactor.jl` depends on `ApproximatingMapsBetweenLinearSpaces.jl`, which is available at [gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces](https://gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces).
+
 
 ## Example 1
 
@@ -41,7 +42,7 @@ This figure illustrates the approximation accuracy by showing the image on $H^2$
 
 Approximate
 $$
-f \colon [1, 2]  \to \mathrm{Gr}(100, 3), t \mapsto \mathrm{span}\{b, A(t) b, A(t)^2, A(t)^3 b\}
+f \colon [1, 2]  \to \mathrm{Gr}(100, 3), t \mapsto \mathrm{span}\{b, A(t) b, A(t)^2\}
 $$
 where $b$ is a random $100$-vector and $A(t)$ is the evaluation of the kernel
 $$

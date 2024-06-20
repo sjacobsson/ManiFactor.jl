@@ -3,7 +3,10 @@ module ManiFactor
 using ManifoldsBase
 using Manifolds
 using ApproximatingMapsBetweenLinearSpaces
+
+# TODO: Remove these once they are commited to Manifolds.jl
 include("segre/Segre.jl")
+include("segre/SegreAlphaWarpedMetric.jl")
 
 export
     approximate,

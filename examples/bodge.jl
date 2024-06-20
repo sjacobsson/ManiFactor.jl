@@ -1,3 +1,4 @@
+# Copy of Example3 to compare how long it takes to evaluate f vs fhat
 # Approximate a function f: [-1, 1]^m -> Gr(n, k)
 # TODO: Why I have to run this example twice?
 using Manifolds
@@ -9,12 +10,11 @@ using Random; Random.seed!(1)
 using Plots; pyplot()
 
 m = 1
-Ns = 2:1:22
+N = 20
 
-n = 200
-k = 3
+n = 600
+k = 4
 M = Grassmann(n, k)
-# M = MetricManifold(Grassmann(n, k), CanonicalMetric()) # Euclidean and canonical metric are the same
 
 # Fix some stuff
 include("hotfix.jl")
@@ -29,7 +29,7 @@ A(t) = pi / (n - 1) * K([pi * i / (n - 1) for i in 0:(n - 1)], [pi * i / (n - 1)
 
 # TODO: Optimize f to scale up in n
 v = 2 * rand(n) .- 1.0
-function f(x) # :: [-1, 1]^m -> Grasssmann(n, k)
+function f(x) # :: [-1, 1]^1 -> Grasssmann(n, k){{{
 
      # Arnoldi iteration
      qs = [zeros(n) for _ in 1:k] # Initialize
@@ -39,49 +39,45 @@ function f(x) # :: [-1, 1]^m -> Grasssmann(n, k)
          for j in 1:(i - 1)
              qs[i] = qs[i] - dot(qs[j], qs[i]) * qs[j]
          end
+         for j in 1:(i - 1) # By Karl's orders
+             qs[i] = qs[i] - dot(qs[j], qs[i]) * qs[j]
+         end
          # println(norm(qs[i])) # If these are too small we might be introducing rounding errors
          qs[i] = normalize(qs[i])
      end
 
      return hcat(qs...)
-end
+end#=}}}=#
+function f_(x) # :: [-1, 1]^m -> Grasssmann(n, k){{{
+    t = x[1]
+
+    return Matrix(qr(hcat([A(t)^i * v for i in 0:(k - 1)]...)).Q)
+end#=}}}=#
 
 # Loop over nbr of interpolation points
 es = [NaN for _ in Ns]
 bs = [NaN for _ in Ns]
 xs = [2 * rand(m) .- 1.0 for _ in 1:100]
 p = mean(M, f.(xs))
-for (i, N) = enumerate(Ns)
-    local fhat = approximate(
-        m,
-        M,
-        f;
-        p=p,
-        univariate_scheme=chebyshev(N),
-        decomposition_method=sthosvd,
-        tolerance=1e-15,
-        )
-
-    local g = (X -> get_coordinates(M, p, X, DefaultOrthonormalBasis())) ∘ (x -> log(M, p, f(x)))
-    local ghat = get_ghat(fhat)
-
-    es[i] = maximum([distance(M, f(x), fhat(x)) for x in xs])
-    bs[i] = maximum([norm(g(x) - ghat(x)) for x in xs])
-end
-
-plt = plot(
-    xlabel="N",
-    xticks=Ns,
-    yaxis=:log,
-    ylims=(1e-16, 2 * maximum([es..., bs...])),
-    yticks=([1e0, 1e-5, 1e-10, 1e-15]),
-    legend=:topright,
+fhat = approximate(
+    m,
+    M,
+    f;
+    p=p,
+    univariate_scheme=chebyshev(N),
+    decomposition_method=sthosvd,
+    tolerance=1e-15,
     )
-plot!(plt, Ns[1:end - 3], bs[1:end - 3]; label="error bound")
-scatter!(plt, Ns, es; label="measured error")
-cs = [(3 + 2 * sqrt(2))^-N for N in Ns]
-# scatter!(plt, Ns, cs; label="1 / (3 + 2 * sqrt(2))^N")
-display(plt)
+
+g = (X -> get_coordinates(M, p, X, DefaultOrthonormalBasis())) ∘ (x -> log(M, p, f(x)))
+ghat = get_ghat(fhat)
+
+t = rand(1)
+# @time for _ in 1:100; f_(t); end # Uses qr
+@time for _ in 1:100; f(t); end
+@time for _ in 1:100; fhat(t); end
+println()
+
 
 # To see that k = 4 is enough for the Krylov subspace to capture the range of A,
 #   using IterativeSolvers
@@ -96,9 +92,3 @@ display(plt)
 #   1       4       6.44e-05
 #   1       5       4.65e-07
 #   1       6       3.81e-10
-
-# # To save figure and data to file:
-# using CSV
-# using DataFrames: DataFrame
-# savefig("Example3.png")
-# CSV.write("Example3.csv", DataFrame([:Ns => Ns, :es => es, :bs => bs, :cs => cs]))

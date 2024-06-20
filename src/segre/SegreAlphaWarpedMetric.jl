@@ -25,8 +25,7 @@ using LinearAlgebra
 using Base.Iterators
 using Kronecker
 
-export AbstractSegre
-export Segre
+export AlphaWarpedMetric
 
 """
     AlphaWarpedMetric{A} <: AbstractMetric
