@@ -16,8 +16,6 @@ If you use this software in your work, please cite
 }
 ```
 
-`ManiFactor.jl` depends on `ApproximatingMapsBetweenLinearSpaces.jl`, which is available at [gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces](https://gitlab.kuleuven.be/numa/software/ApproximatingMapsBetweenLinearSpaces).
-
 
 ## Example 1
 

@@ -5,6 +5,7 @@ using Manifolds
 using ApproximatingMapsBetweenLinearSpaces
 
 # TODO: Remove these once they are commited to Manifolds.jl
+# Also remember to update the deps after this is done
 include("segre/Segre.jl")
 include("segre/SegreAlphaWarpedMetric.jl")
 
