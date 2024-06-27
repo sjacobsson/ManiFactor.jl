@@ -1,13 +1,12 @@
 # Approximate a function f: [-1, 1]^2 -> S^2
-using Manifolds: Sphere
 using ManiFactor
+using Manifolds: Sphere, get_point, StereographicAtlas
 using ApproximatingMapsBetweenLinearSpaces: chebyshev
-using LinearAlgebra
 using Plots; pyplot(); import Plots: (plot!)
 
-function plot!(#={{{=#
+function plot_sphere!(#={{{=#
     p::Plots.Plot,
-    ::Sphere{2},
+    M,
     kwargs...
     )
 
@@ -34,7 +33,7 @@ end#=}}}=#
 
 function plot_grid!(#={{{=#
     p::Plots.Plot,
-    M::Sphere{2},
+    M,
     f::Function;
     label=false,
     color="blue",
@@ -67,46 +66,27 @@ function plot_grid!(#={{{=#
     yaxis!([-1., 1.]) # BODGE
 end#=}}}=#
 
-function stereographic_projection(#={{{=#
-    xs::Vector{Float64};
-    pole::Int64=1
-    )::Vector{Float64}
+n = 2
+M = Sphere(n)
 
-    n = length(xs)
-    @assert(pole <= n + 1)
-    ys = zeros(n + 1) # Initialize
+m = 2
+f(x) = get_point(M, StereographicAtlas(), :south, [x[1]^2 - x[2]^2, 2 * x[1] * x[2]])
 
-    for i in 1:(n + 1)
-        if i < pole
-            ys[i] = (2 * xs[i]) / (1 + norm(xs)^2)
-        elseif i == pole
-            ys[i] = (-1 + norm(xs)^2) / (1 + norm(xs)^2)
-        elseif i > pole
-            ys[i] = (2 * xs[i - 1]) / (1 + norm(xs)^2)
-        end
-    end
-    
-    return ys
-end#=}}}=#
-
-M = Sphere(2)
-f(x) = stereographic_projection([x[1]^2 - x[2]^2, 2 * x[1] * x[2]])
-
-fhat = approximate(2, M, f, univariate_scheme=chebyshev(3))
+fhat = approximate(m, M, f, univariate_scheme=chebyshev(3))
 p1 = plot(; title="9 samples")
-plot!(p1, M)
+plot_sphere!(p1, M)
 plot_grid!(p1, M, f; label="f", color="cyan")
 plot_grid!(p1, M, fhat; label="fhat", color="magenta", linestyle=:dot)
 
-fhat = approximate(2, M, f, univariate_scheme=chebyshev(4))
+fhat = approximate(m, M, f, univariate_scheme=chebyshev(4))
 p2 = plot(; title="16 samples")
-plot!(p2, M)
+plot_sphere!(p2, M)
 plot_grid!(p2, M, f; label="f", color="cyan")
 plot_grid!(p2, M, fhat; label="fhat", color="magenta", linestyle=:dot)
 
-fhat = approximate(2, M, f, univariate_scheme=chebyshev(5))
+fhat = approximate(m, M, f, univariate_scheme=chebyshev(5))
 p3 = plot(; title="25 samples")
-plot!(p3, M)
+plot_sphere!(p3, M)
 plot_grid!(p3, M, f; label="f", color="cyan")
 plot_grid!(p3, M, fhat; label="fhat", color="magenta", linestyle=:dot)
 

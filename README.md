@@ -16,8 +16,22 @@ If you use this software in your work, please cite
 }
 ```
 
-
 ## Example 1
+
+```
+using ManiFactor
+using Manifolds: Sphere, get_point, StereographicAtlas
+
+n = 2
+M = Sphere(n)
+
+m = 2
+f(x) = get_point(M, StereographicAtlas(), :south, [x[1]^2 - x[2]^2, -x[1] * x[2]])
+fhat = approximate(m, M, f)
+
+x0 = rand(m)
+f(x0) - fhat(x0)
+```
 
 Approximate
 $$f \colon [-1, 1]^2 \to S^2, (x, y) \mapsto \mathrm{stereographic~projection}(x^2 - y^2, 2 x y)$$
