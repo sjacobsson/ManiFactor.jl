@@ -1,7 +1,8 @@
 include("../src/segre/Segre.jl")
 include("../src/segre/SegreAlphaWarpedMetric.jl")
 using StatsBase: sample
-# TODO: Make sure A * m < pi when generang points?
+# TODO: Make sure A * m < pi when generating points?
+# TODO: Test that distance() and inner() are compatible?
 
 # Tests are written for manifolds with this type
 T = Union{
@@ -95,6 +96,7 @@ function test_geodesic_speed(#={{{=#
     if verbose; println(); end
 end#=}}}=#
 
+# This test only works if embed is defined
 """ Testing that geodesics only have normal curvature. """
 function test_geodesic_curvature(#={{{=#
     M::T;
@@ -115,7 +117,68 @@ function test_geodesic_curvature(#={{{=#
     @assert(isapprox(dot(n, v_), 0.0, verbose; atol=1e-5))
     if verbose; println(); end
 end#=}}}=#
-# TODO: Test this using only intrinsic properties
+
+""" Testing that geodesics are minimizing. """
+function test_geodesic_minimizes(#={{{=#
+    M::T;
+    verbose=false
+    )
+    if verbose; println("M = ", M); end
+    
+    p = rand(M)
+    if verbose; println("p = ", p); end
+        
+    v = rand(M, vector_at=p); v = v / norm(M, p, v)
+    if verbose; println("v = ", v); end
+
+    n = manifold_dimension(M)
+
+    # We test the following:
+    #   Geodesics are (locally) length-minizing. So let B_a be a one-parameter
+    #   family of curves such that B_0 is a geodesic. Then the derivative of
+    #   length(B_a) at a = 0 should be 0, and the second derivative at should
+    #   be nonnegative.
+
+    x = get_coordinates(M, p, v)
+    x0 = 0.0 * x
+    x1 = 0.2 * x
+    x2 = 0.4 * x
+    x3 = 0.6 * x
+    x4 = 0.8 * x
+    x5 = 1.0 * x
+            
+    function curve_length(y::Vector{Float64})
+        @assert(length(y) == 4 * n)
+
+        # Control points
+        y1 = y[1:n]
+        y2 = y[n + 1:2 * n]
+        y3 = y[2 * n + 1:3 * n]
+        y4 = y[3 * n + 1:4 * n]
+
+        # Bezier curve from 0 to v
+        b(t) = (
+            (1 - t)^5 * x0 +
+            5 * t * (1 - t)^4 * (x1 + y1) +
+            10 * t^2 * (1 - t)^3 * (x2 + y2) +
+            10 * t^3 * (1 - t)^2 * (x3 + y3) +
+            5 * t^4 * (1 - t) * (x4 + y4) +
+            t^5 * x5
+            )
+
+        # Length of curve on manifold
+        ps = [exp(M, p, get_vector(M, p, b(t))) for t in 0.0:1e-3:1.0]
+        ds = [distance(M, p1, p2) for (p1, p2) in zip(ps[1:end - 1], ps[2:end])]
+        return sum(ds)
+    end
+
+    dy = rand(4 * n); dy = dy / norm(dy)
+    f = a -> curve_length(a * dy)
+    @assert(isapprox(finite_difference(f, 0.0, 1e-3), 0.0, verbose; atol=1e-5))
+    if verbose; println(finite_difference(f, 0.0, 1e-2; order=2), " ?≥ 0"); end
+    @assert(finite_difference(f, 0.0, 1e-2; order=2) >= 0.0)
+    if verbose; println(); end
+end#=}}}=#
 
 """ Test that log is left and right inverse of exp. """
 function test_log(#={{{=#
@@ -295,11 +358,16 @@ function main(;#={{{=#
         test_geodesic_speed(M; kwargs...)
     end
     
-    # TODO: This only makes sense if you have a Riemannian embedding
+    # # This only makes sense if you have a Riemannian embedding
     # println("Testing that geodesics only have normal curvature.")
     # for M in Ms
     #     test_geodesic_curvature(M; kwargs...)
     # end
+    
+    println("Testing that geodesics are minimizing.")
+    for M in Ms
+        test_geodesic_minimizes(M; kwargs...)
+    end
     
     println("Testing that log is inverse of exp.")
     for M in Ms

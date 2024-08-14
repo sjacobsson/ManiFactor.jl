@@ -1,7 +1,5 @@
 # TODO: Cite upcoming preprint.
 # TODO: Optimize by computing m fewer times?
-# TODO: Equality is defined as embed(p) == embed(p) rather than p == q
-# TODO: For A =/= 1.0, embed() is not a Riemannian embedding, only a smooth embedding
 import ManifoldsBase:
     manifold_dimension,
     check_size,
