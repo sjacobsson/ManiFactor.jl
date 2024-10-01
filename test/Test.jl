@@ -1,8 +1,6 @@
 include("../src/segre/Segre.jl")
 include("../src/segre/SegreAlphaWarpedMetric.jl")
 using StatsBase: sample
-# TODO: Make sure A * m < pi when generating points?
-# TODO: Test that distance() and inner() are compatible?
 
 # Tests are written for manifolds with this type
 T = Union{
@@ -55,7 +53,7 @@ function finite_difference(#={{{=#
     end
 end#=}}}=#
 
-""" Testing that exp maps into the manifold. """
+""" Test that exp maps into the manifold. """
 function test_exp(#={{{=#
     M::T;
     verbose=false
@@ -73,7 +71,7 @@ function test_exp(#={{{=#
     @assert(is_point(M, exp(M, p, v)))
 end#=}}}=#
 
-""" Testing that geodesics are unit speed. """
+""" Test that geodesics are unit speed. """
 function test_geodesic_speed(#={{{=#
     M::T;
     verbose=false
@@ -96,12 +94,13 @@ function test_geodesic_speed(#={{{=#
     if verbose; println(); end
 end#=}}}=#
 
-# This test only works if embed is defined
-""" Testing that geodesics only have normal curvature. """
+""" Test that geodesics only have normal curvature. """
 function test_geodesic_curvature(#={{{=#
     M::T;
     verbose=false
     )
+    # Make sure embed() is a _Riemannian_ embedding and not just a smooth embedding
+
     if verbose; println("M = ", M); end
     
     p = rand(M)
@@ -118,7 +117,7 @@ function test_geodesic_curvature(#={{{=#
     if verbose; println(); end
 end#=}}}=#
 
-""" Testing that geodesics are minimizing. """
+""" Test that geodesics are minimizing. """
 function test_geodesic_minimizes(#={{{=#
     M::T;
     verbose=false
@@ -180,7 +179,7 @@ function test_geodesic_minimizes(#={{{=#
     if verbose; println(); end
 end#=}}}=#
 
-""" Test that log is left and right inverse of exp. """
+""" Test that log is inverse of exp. """
 function test_log(#={{{=#
     M::Segre{V, ℝ};
     verbose=false
@@ -188,8 +187,14 @@ function test_log(#={{{=#
     if verbose; println("M = ", M); end
     
     p = rand(M)
-    q = rand(M)
     if verbose; println("p = ", p); end
+
+    # Make sure we choose p and q compatible
+    m(a, b) = sqrt(sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, a[2:end], b[2:end])]))
+    q = rand(M)
+    while m(p, q) > pi
+        q = rand(M)
+    end
     if verbose; println("q = ", q); end
         
     v = rand(M, vector_at=p); v = v / norm(M, p, v)
@@ -202,7 +207,7 @@ function test_log(#={{{=#
     if verbose; println(); end
 end#=}}}=#
 
-""" Test that log is left and right inverse of exp. """
+""" Test that log is inverse of exp. """
 function test_log(#={{{=#
     M::MetricManifold{ℝ, Segre{V, ℝ}, AlphaWarpedMetric{A}};
     verbose=false
@@ -212,7 +217,7 @@ function test_log(#={{{=#
     p = rand(M)
     if verbose; println("p = ", p); end
 
-    # When A > 1.0, we have to make sure we choose p and q compatible
+    # Make sure we choose p and q compatible
     m(a, b) = sqrt(sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, a[2:end], b[2:end])]))
     q = rand(M)
     while A * m(p, q) > pi
@@ -358,7 +363,7 @@ function main(;#={{{=#
         test_geodesic_speed(M; kwargs...)
     end
     
-    # # This only makes sense if you have a Riemannian embedding
+    # # This only makes sense if you have a Riemannian embedding, but should be redundant anyways given test_geodesic_minimizes
     # println("Testing that geodesics only have normal curvature.")
     # for M in Ms
     #     test_geodesic_curvature(M; kwargs...)
@@ -388,4 +393,8 @@ function main(;#={{{=#
     for M in Ms
         test_curvature(M; kwargs...)
     end
+
+    # TODO: Test that distance and inner are compatible
+    # TODO: Test that riemann_tensor and sectional_curvature are compatible (this test is trivial the way sectional_curvature is implemented atm, but should maybe be performed just so that the tests are complete)
+    # TODO: Test second_fundamental_form
 end#=}}}=#

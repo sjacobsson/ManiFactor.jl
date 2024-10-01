@@ -545,7 +545,6 @@ function distance(#={{{=#
     # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(m)) but more stable for small m
 end#=}}}=#
 
-# TODO: Check factor of p[1][1]
 """
     function second_fundamental_form(
         M::Segre{V, ℝ},

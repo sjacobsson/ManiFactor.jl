@@ -226,12 +226,11 @@ function log(#={{{=#
         log!(M, v, p, q)
     else
         # Find closest representation by flipping an even number of signs.
-        # TODO: cite prop 5.3 for the fact that closest representation gives closest geodesic?
         ds = [distance(Sphere(n - 1), x, y) for (n, x, y) in zip(V, p[2:end], q[2:end])]
         flips = [false, (ds .> (pi / 2))...]
         nbr_flips = sum(flips)
 
-        # This code is pretty ugly.
+        # This code is pretty ugly. It can also be implemented slightly more efficiently, O(d) rather than O(log(d) d), by not sorting ds.
         if isodd(nbr_flips)
             if nbr_flips == length(V)
                 flips[argmin(ds) + 1] = false
@@ -256,7 +255,6 @@ function log(#={{{=#
         q_[flips] = -q[flips]
         @assert(iseven(sum(flips))) # Should not be necessary but you never know...
         @assert(A * m(p, q_) < pi)
-        # TODO: cite definition 5.1 and proposition 5.1 for alpha-compatibility?
 
         v = zeros.(size.(p)) # Initialize
         log!(M, v, p, q_)
