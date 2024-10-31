@@ -21,6 +21,8 @@ export
         f::Function; # :: [-1, 1]^m -> M^n
         p=[], # Point to linearize around. Default is Karcher mean of 100 samples.
         base_approximate=approximate_vector::Function, # :: (m::Int) -> (n::Int) -> ([-1, 1]^m -> R^n) -> ([-1, 1]^m -> R^n)
+        exp=exp, # Default to exponential retraction
+        log=log, # Default to logarithmic inverse retraction
         kwargs...
         )::Function # :: [-1, 1]^m -> M^n
 
@@ -32,7 +34,8 @@ function approximate(#={{{=#
     f::Function; # :: [-1, 1]^m -> M^n
     p=[], # Point to linearize around. Default is Karcher mean of 100 samples.
     base_approximate=approximate_vector::Function, # :: (m::Int) -> (n::Int) -> ([-1, 1]^m -> R^n) -> ([-1, 1]^m -> R^n)
-    # TODO: provice chart as an option?
+    exp=exp, # Default to exponential retraction
+    log=log, # Default to logarithmic inverse retraction
     kwargs...
     )::Function # :: [-1, 1]^m -> M^n
 
