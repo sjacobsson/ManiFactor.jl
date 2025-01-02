@@ -27,7 +27,7 @@ function f(x) # :: [-1, 1]^m -> Grassmann(n, k)
     # Discretize d^2/dt + x1 d/dt + x2
     Delta = 1.0 / (n - 1)
     A = sparse(
-        Tridiagonal(-ones(n - 1), 2 * ones(n), -ones(n - 1)) / Delta^2 +
+        Tridiagonal(ones(n - 1), -2 * ones(n), ones(n - 1)) / Delta^2 +
         (1.5 + x[1] / 2) * Tridiagonal(-ones(n - 1), zeros(n), ones(n - 1)) / (2 * Delta) +
         (1.5 + x[2] / 2) * Diagonal(ones(n))
         )
@@ -91,7 +91,7 @@ display(plt)
 # using IterativeSolvers
 # Delta = 1.0 / (n - 1)
 # A = sparse(
-#     Tridiagonal(-ones(n - 1), 2 * ones(n), -ones(n - 1)) / Delta^2 +
+#     Tridiagonal(ones(n - 1), -2 * ones(n), ones(n - 1)) / Delta^2 +
 #     1.5 * Tridiagonal(-ones(n - 1), zeros(n), ones(n - 1)) / (2 * Delta) +
 #     1.5 * Diagonal(ones(n))
 #     )
@@ -113,7 +113,7 @@ display(plt)
 # using Interpolations
 # function my_ode!(du, u, p, t)
 #     du[1] = u[2]
-#     du[2] = 1.5 * u[2] + 1.5 * u[1] - t * (1 - t)
+#     du[2] = -1.5 * u[2] - 1.5 * u[1] + t * (1 - t)
 # end
 # function bc!(residual, u, p, t)
 #     residual[1] = u[1][1]
@@ -121,7 +121,7 @@ display(plt)
 # end
 # u0 = [0.0, 0.0]
 # tspan = (0.0, 1.0)
-# solution = solve(BVProblem(my_ode!, bc!, u0, tspan), reltol=1e-15)
+# solution = solve(BVProblem(my_ode!, bc!, u0, tspan), reltol=1e-10)
 # Y = gmres(A, B; maxiter=5, restart=100, Pl=P)
 # estimate = linear_interpolation([i / (n - 1) for i in 0:(n - 1)], Y)
 # for _ in 1:10

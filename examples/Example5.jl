@@ -12,7 +12,7 @@ Ns=2:1:16
 
 s=100
 s=10 # BODGE
-M = Segre((s, s))
+M = Segre(s, s)
 
 # f(x) is the closest rank 1 approximation to
 #   exp(a x1) exp(V x2) diag(2^-1, 2^-2, ...) exp(W x2)

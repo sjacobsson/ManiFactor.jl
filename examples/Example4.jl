@@ -27,7 +27,7 @@ function f(x) # :: [-1, 1]^m -> Grassmann(n, k)
     # Discretize d^2/dt + x1 d/dt + x2
     Delta = 1.0 / (n - 1)
     A = sparse(
-        Tridiagonal(-ones(n - 1), 2 * ones(n), -ones(n - 1)) / Delta^2 +
+        Tridiagonal(ones(n - 1), -2 * ones(n), ones(n - 1)) / Delta^2 +
         (1.5 + x[1] / 2) * Tridiagonal(-ones(n - 1), zeros(n), ones(n - 1)) / (2 * Delta) +
         (1.5 + x[2] / 2) * Diagonal(ones(n))
         )
@@ -125,41 +125,41 @@ display(plt)
 # savefig("Example4.png")
 # CSV.write("Example4.csv", DataFrame([:Ns => Ns, :es0 => es0, :es1 => es1, :es2 => es2]))
 
-# To benchmark
-using BenchmarkTools
-fhat0 = approximate(
-    m,
-    M,
-    f;
-    p=p,
-    univariate_scheme=chebyshev(10),
-    reqrank=[5, 5, 5],
-    )
-fhat1 = approximate(
-    m,
-    M,
-    f;
-    p=p,
-    exp=(M, p, X) -> retract(M, p, X, QRRetraction()),
-    log=(M, p, X) -> inverse_retract(M, p, X, QRInverseRetraction()),
-    univariate_scheme=chebyshev(10),
-    reqrank=[5, 5, 5],
-    )
-fhat2 = approximate(
-    m,
-    M,
-    f;
-    p=p,
-    exp=(M, p, X) -> retract(M, p, X, PolarRetraction()),
-    log=(M, p, X) -> inverse_retract(M, p, X, PolarInverseRetraction()),
-    univariate_scheme=chebyshev(10),
-    reqrank=[5, 5, 5],
-    )
-print("f time: "); @btime f(rand(2)) # btime reports fastest time
-println("fhat0 error: ", maximum([distance(M, f(x), fhat0(x)) for x in xs]))
-print("fhat0 time: "); @btime fhat0(rand(2))
-println("fhat1 error: ", maximum([distance(M, f(x), fhat1(x)) for x in xs]))
-print("fhat1 time: "); @btime fhat1(rand(2))
-println("fhat2 error: ", maximum([distance(M, f(x), fhat2(x)) for x in xs]))
-print("fhat2 time: "); @btime fhat2(rand(2))
-"" # BODGE
+# # To benchmark
+# using BenchmarkTools
+# fhat0 = approximate(
+#     m,
+#     M,
+#     f;
+#     p=p,
+#     univariate_scheme=chebyshev(10),
+#     reqrank=[5, 5, 5],
+#     )
+# fhat1 = approximate(
+#     m,
+#     M,
+#     f;
+#     p=p,
+#     exp=(M, p, X) -> retract(M, p, X, QRRetraction()),
+#     log=(M, p, X) -> inverse_retract(M, p, X, QRInverseRetraction()),
+#     univariate_scheme=chebyshev(10),
+#     reqrank=[5, 5, 5],
+#     )
+# fhat2 = approximate(
+#     m,
+#     M,
+#     f;
+#     p=p,
+#     exp=(M, p, X) -> retract(M, p, X, PolarRetraction()),
+#     log=(M, p, X) -> inverse_retract(M, p, X, PolarInverseRetraction()),
+#     univariate_scheme=chebyshev(10),
+#     reqrank=[5, 5, 5],
+#     )
+# print("f time: "); @btime f(rand(2)) # btime reports fastest time
+# println("fhat0 error: ", maximum([distance(M, f(x), fhat0(x)) for x in xs]))
+# print("fhat0 time: "); @btime fhat0(rand(2))
+# println("fhat1 error: ", maximum([distance(M, f(x), fhat1(x)) for x in xs]))
+# print("fhat1 time: "); @btime fhat1(rand(2))
+# println("fhat2 error: ", maximum([distance(M, f(x), fhat2(x)) for x in xs]))
+# print("fhat2 time: "); @btime fhat2(rand(2))
+# "" # BODGE

@@ -1,7 +1,7 @@
 name = "ManiFactor"
 uuid = "644c2d91-53c3-4334-b351-920c96c0b266"
 authors = ["Simon Jacobsson <simon.jacobsson@kuleuven.be>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 ApproximatingMapsBetweenLinearSpaces = "31d768e5-ae28-4338-b319-fc9871ebca58"
@@ -16,6 +16,6 @@ julia = "1"
 ApproximatingMapsBetweenLinearSpaces = "0.1"
 Kronecker = "0.5"
 LinearAlgebra = "1"
-Manifolds = "0.9"
+Manifolds = "0.10.10"
 ManifoldsBase = "0.15"
 SplitApplyCombine = "1"

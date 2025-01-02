@@ -184,6 +184,8 @@ function test_log(#={{{=#
     M::Segre{V, ℝ};
     verbose=false
     ) where {V}
+    # TODO: This function can/should be written for a general manifold that implements injectivity_radius
+
     if verbose; println("M = ", M); end
     
     p = rand(M)
