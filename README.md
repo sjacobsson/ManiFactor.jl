@@ -68,14 +68,21 @@ This figure illustrates the approximation accuracy compared to what is predicted
 
 $N$ is the number of sample points in each direction, so that the total number of sample points is $N^2$.
 
-
 ## Example 4
+
+We can also use retractions instead of exp and log.
+Although we can't derive error bounds when retracting, the difference is in practice often negligeble.
+Here is a comparison using example 3:
+
+![Plot](examples/Example4.png)
+
+## Example 5
 
 Approximate
 $$f \colon [-1, 1]^3 \to \mathrm{Segre}(30, 30), x \mapsto \frac{1}{2} \exp{x_1} \exp{(W_1 x_2)} e_1 (\exp{(W_2 x_3)} e_1)^\mathrm{T}$$
 where $W_1$ and $W_2$ are randomly chosen antisymmetric $30 \times 30$ matrices and $e_1 = (1, 0, \dots, 0)$.
 This figure illustrates the approximation accuracy compared to what is predicted by the theory:
 
-![Plot](examples/Example4.png)
+![Plot](examples/Example5.png)
 
 $N$ is the number of sample points in each direction, so that the total number of sample points is $N^3$.
