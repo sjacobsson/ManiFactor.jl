@@ -2,7 +2,7 @@
 
 Approximate functions of type $$\mathbb{R}^m \to M^n$$ where $M^n$ is an $n$-dimensional Riemannian manifold.
 
-To learn more about approximating maps into Riemannian manifolds, check out our preprint at [https://doi.org/10.1007/s10543-025-01080-x](https://doi.org/10.1007/s10543-025-01080-x).
+To learn more about approximating maps into Riemannian manifolds, check out our paper at [https://doi.org/10.1007/s10543-025-01080-x](https://doi.org/10.1007/s10543-025-01080-x).
 
 If you use this software in your work, please cite
 ```
