@@ -2,17 +2,23 @@
 
 Approximate functions of type $$\mathbb{R}^m \to M^n$$ where $M^n$ is an $n$-dimensional Riemannian manifold.
 
-To learn more about approximating maps into Riemannian manifolds, check out our preprint at [arxiv.org/abs/2403.16785](https://arxiv.org/abs/2403.16785).
+To learn more about approximating maps into Riemannian manifolds, check out our preprint at [https://doi.org/10.1007/s10543-025-01080-x](https://doi.org/10.1007/s10543-025-01080-x).
 
 If you use this software in your work, please cite
 ```
-@misc{jacobsson2024,
-      title={Approximating maps into manifolds with lower curvature bounds}, 
-      author={Simon Jacobsson and Raf Vandebril and Joeri van der Veken and Nick Vannieuwenhoven},
-      year={2024},
-      eprint={2403.16785},
-      archivePrefix={arXiv},
-      primaryClass={math.NA}
+@article{Jacobsson2025,
+  author = {Jacobsson, Simon and Vandebril, Raf and Van der Veken, Joeri and Vannieuwenhoven, Nick},
+  title = {Approximating maps into manifolds with lower curvature bounds},
+  journal = {BIT Numerical Mathematics},
+  year = {2025},
+  month = {Aug},
+  day = {12},
+  volume = {65},
+  number = {3},
+  pages = {37},
+  issn = {1572-9125},
+  doi = {10.1007/s10543-025-01080-x},
+  url = {https://doi.org/10.1007/s10543-025-01080-x}
 }
 ```
 
